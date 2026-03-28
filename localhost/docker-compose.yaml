@@ -1,0 +1,129 @@
+name: redfox
+
+services:
+
+  postgres:
+    image: postgres:18.3-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: redfox
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - postgres
+    volumes:
+      - ./conf/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d redfox"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  #
+  # Monitoring Profile
+  #
+
+  prometheus:
+    image: prom/prometheus:v3.10.0
+    profiles:
+      - monitoring
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./conf/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    depends_on:
+      redfox-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- -q http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  loki:
+    image: grafana/loki:3.6
+    profiles:
+      - monitoring
+    volumes:
+      - ./conf/loki/loki.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "/usr/bin/loki", "-health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  promtail:
+    image: grafana/promtail:3.6
+    profiles:
+      - monitoring
+    volumes:
+      - ./conf/promtail/promtail.yaml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+    depends_on:
+      loki:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- -q http://localhost:9080/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  grafana:
+    image: grafana/grafana:12.3
+    profiles:
+      - monitoring
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: postgres:5432
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_USER: postgres
+      GF_DATABASE_PASSWORD: postgres
+      GF_DATABASE_SSL_MODE: disable
+    volumes:
+      - ./conf/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./conf/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - monitoring
+      - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- -q http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  monitoring:
+  postgres:
+
+volumes:
+  loki_data:
+  postgres_data:
+  prometheus_data:

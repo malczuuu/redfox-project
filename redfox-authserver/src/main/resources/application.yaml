@@ -1,0 +1,38 @@
+server:
+  port: 8482
+
+spring:
+  application:
+    name: redfox-authserver
+  main:
+    banner-mode: off
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/redfox
+    username: postgres
+    password: postgres
+  validation:
+    method:
+      adapt-constraint-violations: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,prometheus"
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+problem4j:
+  detail-format: lowercase
