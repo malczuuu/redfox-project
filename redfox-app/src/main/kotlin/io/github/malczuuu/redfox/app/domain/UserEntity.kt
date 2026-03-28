@@ -13,24 +13,24 @@ import java.time.Instant
 @AttributeOverrides(
     AttributeOverride(name = "id", column = Column(name = "user_id")),
     AttributeOverride(name = "version", column = Column(name = "user_version")),
-    AttributeOverride(name = "created_at", column = Column(name = "user_created_at")),
-    AttributeOverride(name = "updated_at", column = Column(name = "user_updated_at")),
+    AttributeOverride(name = "createdAt", column = Column(name = "user_created_at")),
+    AttributeOverride(name = "updatedAt", column = Column(name = "user_updated_at")),
 )
-class User(
+class UserEntity(
 
-    @Column(name = "user_login", nullable = false, length = 255, unique = true)
+    @field:Column(name = "user_login", nullable = false, length = 255, unique = true)
     var login: String,
 
-    @Column(name = "user_passhash", nullable = false, length = 255)
+    @field:Column(name = "user_passhash", nullable = false, length = 255)
     var passhash: String,
 
-    @Column(name = "user_first_name", nullable = false, length = 255)
+    @field:Column(name = "user_first_name", nullable = false, length = 255)
     var firstName: String,
 
-    @Column(name = "user_last_name", nullable = false, length = 255)
+    @field:Column(name = "user_last_name", nullable = false, length = 255)
     var lastName: String,
 
-    @Column(name = "user_deleted_at")
+    @field:Column(name = "user_deleted_at")
     var deletedAt: Instant? = null
 
 ) : AuditableEntity()

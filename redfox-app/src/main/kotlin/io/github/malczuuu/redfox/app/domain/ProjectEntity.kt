@@ -13,21 +13,21 @@ import java.time.Instant
 @AttributeOverrides(
     AttributeOverride(name = "id", column = Column(name = "project_id")),
     AttributeOverride(name = "version", column = Column(name = "project_version")),
-    AttributeOverride(name = "created_at", column = Column(name = "project_created_at")),
-    AttributeOverride(name = "updated_at", column = Column(name = "project_updated_at")),
+    AttributeOverride(name = "createdAt", column = Column(name = "project_created_at")),
+    AttributeOverride(name = "updatedAt", column = Column(name = "project_updated_at")),
 )
-class Project(
+class ProjectEntity(
 
-    @Column(name = "project_code", nullable = false, length = 255, unique = true)
+    @field:Column(name = "project_code", nullable = false, length = 255, unique = true)
     var code: String,
 
-    @Column(name = "project_name", nullable = false, length = 255)
+    @field:Column(name = "project_name", nullable = false, length = 255)
     var name: String,
 
-    @Column(name = "project_description", nullable = false, length = 2048)
+    @field:Column(name = "project_description", nullable = false, length = 2048)
     var description: String,
 
-    @Column(name = "project_deleted_at", nullable = false)
+    @field:Column(name = "project_deleted_at")
     var deletedAt: Instant? = null
 
 ) : AuditableEntity()

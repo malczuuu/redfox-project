@@ -13,8 +13,8 @@ dependencies {
 
     api(libs.spring.boot.starter.flyway.test)
     api(libs.spring.boot.starter.data.jpa.test)
-    api(libs.spring.boot.starter.webmvc.test)
     api(libs.spring.boot.starter.validation.test)
+    api(libs.spring.boot.starter.webmvc.test)
 
     api(libs.spring.boot.resttestclient)
     api(libs.spring.boot.testcontainers)

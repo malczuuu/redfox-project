@@ -13,9 +13,7 @@ CREATE
         );
 
 ALTER TABLE
-    users CONSTRAINT pk_users PRIMARY KEY(user_id) ON
-    DELETE
-        RESTRICT;
+    users ADD CONSTRAINT pk_users PRIMARY KEY(user_id);
 
 CREATE
     UNIQUE INDEX idx_users_login_unique ON

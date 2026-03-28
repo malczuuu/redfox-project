@@ -9,22 +9,17 @@ CREATE
             thing_version BIGINT NOT NULL DEFAULT 0,
             thing_created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
             thing_updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            thing_deleted_at TIMESTAMPTZ DEFAULT NULL,
+            thing_deleted_at TIMESTAMPTZ DEFAULT NULL
         );
 
 ALTER TABLE
-    things CONSTRAINT pk_things PRIMARY KEY(project_id) ON
-    DELETE
-        RESTRICT;
+    things ADD CONSTRAINT pk_things PRIMARY KEY(thing_id);
 
 ALTER TABLE
-    things ADD CONSTRAINT fk_things_project FOREIGN KEY(project_id) REFERENCES projects(project_id) ON
-    DELETE
-        RESTRICT;
+    things ADD CONSTRAINT fk_things_project FOREIGN KEY(project_id) REFERENCES projects(project_id);
 
-ALTER TABLE
-    things CREATE
-        UNIQUE INDEX idx_things_code_unique ON
-        things(
-            LOWER( thing_code )
-        );
+CREATE
+    UNIQUE INDEX idx_things_code_unique ON
+    things(
+        LOWER( thing_code )
+    );

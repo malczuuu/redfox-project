@@ -10,7 +10,7 @@ import java.util.UUID
 abstract class AbstractEntity(
 
     @Id
-    @Column(name = "project_id", nullable = false)
+    @field:Column(name = "id", nullable = false)
     val id: UUID = UUID.randomUUID()
 
 )

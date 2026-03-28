@@ -16,15 +16,15 @@ abstract class AuditableEntity(
 
     id: UUID = UUID.randomUUID(),
 
-    @Column(name = "project_version", nullable = false)
+    @field:Column(name = "entity_version", nullable = false)
     var version: Long = 0,
 
     @CreatedDate
-    @Column(name = "project_created_at", nullable = false)
+    @field:Column(name = "entity_created_at", nullable = false)
     var createdAt: Instant? = null,
 
     @LastModifiedDate
-    @Column(name = "project_updated_at", nullable = false)
+    @field:Column(name = "entity_updated_at", nullable = false)
     var updatedAt: Instant? = null
 
 ) : AbstractEntity(id)

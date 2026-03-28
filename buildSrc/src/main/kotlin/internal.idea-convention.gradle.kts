@@ -20,7 +20,7 @@ idea {
                 }
                 create<Application>("Run [redfox-authserver]") {
                     mainClass = "io.github.malczuuu.redfox.authserver.AuthServerApplicationKt"
-                    moduleName = "redfox-project.redfox-app.main"
+                    moduleName = "redfox-project.redfox-authserver.main"
                     workingDirectory = rootProject.rootDir.absolutePath
                     programParameters = ""
                 }
@@ -32,6 +32,10 @@ idea {
                 }
                 create<Gradle>("Build [redfox-project]") {
                     taskNames = listOf("spotlessApply build")
+                    projectPath = rootProject.rootDir.absolutePath
+                }
+                create<Gradle>("Build [redfox-project|containers]") {
+                    taskNames = listOf("spotlessApply build -Pcontainers.enabled")
                     projectPath = rootProject.rootDir.absolutePath
                 }
                 create<Gradle>("Test [redfox-project]") {
@@ -60,11 +64,6 @@ idea {
                     moduleName = "redfox-project.redfox-flyway.test"
                     workingDirectory = rootProject.rootDir.absolutePath
                     packageName = "io.github.malczuuu.redfox.flyway"
-                }
-                create<JUnit>("JUnit [redfox-testkit]") {
-                    moduleName = "redfox-project.redfox-libs.redfox-testkit.test"
-                    workingDirectory = rootProject.rootDir.absolutePath
-                    packageName = "io.github.malczuuu.redfox.testkit"
                 }
             }
         }

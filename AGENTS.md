@@ -14,6 +14,7 @@ Requires JDK 25 and Docker (for Testcontainers). Always run `./gradlew spotlessA
 - No wildcard imports in Kotlin.
 - All dependency versions in `gradle/libs.versions.toml`.
 - Spotless enforces formatting - never manually reformat.
+- Private methods must be after public methods and ordered by importance and/or usage order.
 
 ## Test Guidelines
 
@@ -25,6 +26,7 @@ Requires JDK 25 and Docker (for Testcontainers). Always run `./gradlew spotlessA
 - **Execution:** Run tests once, save output to `build/test-run.log` inside the repo (`> build/test-run.log 2>&1`), then
   read from that file to extract errors. Never run the same test command multiple times, without changes in sources. You
   can store test output in multiple files if you want to compare before/after changes (ex. `build/test-run-{i}.log`).
+- **Methods Order:** First `@Before*` and `@After*`, then test methods, then any helper methods.
 
 ## Integration Test Guidelines
 

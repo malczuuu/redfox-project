@@ -4,17 +4,16 @@
 [versions]
 archunit = "1.4.1"
 checkmate = "0.0.6"
-fasterxml-jackson = "2.21.1"
+fasterxml-jackson = "2.21.2"
 idea-ext = "1.4.1"
-jbcrypt = "0.4"
 jspecify = "1.0.0"
 junit = "6.0.3"
-kotlin = "2.3.10"
-problem4j-spring = "2.2.2"
-spotless = "8.3.0"
-spring-boot = "4.0.3"
+kotlin = "2.3.20"
+problem4j-spring = "2.2.4"
+spotless = "8.4.0"
+spring-boot = "4.0.4"
 springdoc-openapi = "3.0.2"
-tools-jackson = "3.1.0"
+tools-jackson = "3.1.1"
 
 [plugins]
 idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "idea-ext" }
@@ -36,9 +35,7 @@ tools-jackson-bom = { module = "tools.jackson:jackson-bom", version.ref = "tools
 #
 #  modules managed by boms
 #
-fasterxml-jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
-jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
 postgresql = { module = "org.postgresql:postgresql" }
@@ -53,10 +50,12 @@ spring-boot-starter-flyway = { module = "org.springframework.boot:spring-boot-st
 spring-boot-starter-flyway-test = { module = "org.springframework.boot:spring-boot-starter-flyway-test" }
 spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging" }
 spring-boot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2" }
-spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
-spring-boot-starter-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-security-test = { module = "org.springframework.boot:spring-boot-starter-security-test" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 spring-boot-starter-validation-test = { module = "org.springframework.boot:spring-boot-starter-validation-test" }
+spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
+spring-boot-starter-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
 spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
@@ -66,7 +65,6 @@ archunit = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "arc
 checkmate-annotation = { module = "io.github.malczuuu:checkmate-annotation", version.ref = "checkmate" }
 checkmate-archunit = { module = "io.github.malczuuu:checkmate-archunit", version.ref = "checkmate" }
 checkmate-container = { module = "io.github.malczuuu:checkmate-container", version.ref = "checkmate" }
-jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }

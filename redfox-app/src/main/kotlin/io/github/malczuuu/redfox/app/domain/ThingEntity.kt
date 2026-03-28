@@ -16,25 +16,25 @@ import java.time.Instant
 @AttributeOverrides(
     AttributeOverride(name = "id", column = Column(name = "thing_id")),
     AttributeOverride(name = "version", column = Column(name = "thing_version")),
-    AttributeOverride(name = "created_at", column = Column(name = "thing_created_at")),
-    AttributeOverride(name = "updated_at", column = Column(name = "thing_updated_at")),
+    AttributeOverride(name = "createdAt", column = Column(name = "thing_created_at")),
+    AttributeOverride(name = "updatedAt", column = Column(name = "thing_updated_at")),
 )
-class Thing(
+class ThingEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
-    var project: Project,
+    var project: ProjectEntity,
 
-    @Column(name = "thing_code", nullable = false, length = 255, unique = true)
+    @field:Column(name = "thing_code", nullable = false, length = 255, unique = true)
     var code: String,
 
-    @Column(name = "thing_name", nullable = false, length = 255)
+    @field:Column(name = "thing_name", nullable = false, length = 255)
     var name: String,
 
-    @Column(name = "thing_description", nullable = false, length = 2048)
+    @field:Column(name = "thing_description", nullable = false, length = 2048)
     var description: String,
 
-    @Column(name = "thing_deleted_at")
+    @field:Column(name = "thing_deleted_at")
     var deletedAt: Instant? = null
 
 ) : AuditableEntity()

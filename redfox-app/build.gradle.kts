@@ -19,8 +19,9 @@ dependencies {
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.log4j2)
-    implementation(libs.spring.boot.starter.webmvc)
+    implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.micrometer.registry.prometheus)
 
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
@@ -30,6 +31,7 @@ dependencies {
     testImplementation(project(":redfox-libs:redfox-migration"))
     testImplementation(project(":redfox-libs:redfox-testkit"))
     testImplementation(libs.spring.boot.starter.actuator.test)
+    testImplementation(libs.spring.boot.starter.security.test)
     testRuntimeOnly(libs.junit.platform.launcher)
     testRuntimeOnly(libs.postgresql)
 }

@@ -15,15 +15,15 @@ import jakarta.persistence.Table
 @AttributeOverrides(
     AttributeOverride(name = "id", column = Column(name = "project_user_id")),
 )
-class ProjectUser(
+class ProjectUserEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", updatable = false)
-    var project: Project,
+    var project: ProjectEntity,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", updatable = false)
-    var user: User
+    var user: UserEntity
 
 ) : AbstractEntity()
 // spotless:on
