@@ -38,6 +38,9 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
       authorizeHttpRequests {
         authorize("/api/v1/**", permitAll)
         authorize("/actuator/**", permitAll)
+        authorize("/swagger-ui/**", permitAll)
+        authorize("/v3/api-docs", permitAll)
+        authorize("/v3/api-docs/swagger-config", permitAll)
         authorize("/**", denyAll)
       }
       exceptionHandling {
