@@ -19,7 +19,7 @@ dependencies {
     implementation(libs.spring.boot.starter.log4j2)
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.boot.starter.webmvc)
-    implementation(libs.spring.cloud.starter.gateway.server.webmvc")
+    implementation("org.springframework.cloud:spring-cloud-starter-gateway-server-webmvc")
     implementation(libs.micrometer.registry.prometheus)
 
     testImplementation(libs.spring.boot.starter.webmvc.test)

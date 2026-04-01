@@ -22,6 +22,28 @@ spring:
   validation:
     method:
       adapt-constraint-violations: true
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: ${REDFOX_AUTHSERVER_ISSUER:http://localhost:8483}
+        client:
+          redfox-gateway:
+            registration:
+              client-id: redfox-gateway
+              client-secret: "{bcrypt}$2b$12$z2I9UU/FZuhBaZzgegtUqePMo/Z1HetY8SlGzVwYLaeUeowvu8AI2"
+              client-authentication-methods:
+                - client_secret_basic
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - http://localhost:8480/oauth2/callback
+              scopes:
+                - openid
+            token:
+              access-token-time-to-live: 30m
+              refresh-token-time-to-live: 8h
+              reuse-refresh-tokens: false
 
 management:
   endpoints:

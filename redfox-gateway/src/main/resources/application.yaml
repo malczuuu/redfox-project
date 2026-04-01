@@ -11,6 +11,11 @@ spring:
       server:
         webmvc:
           routes:
+            - id: gateway-local
+              uri: forward:///
+              predicates:
+                - Path=/oauth2/callback,/logout
+              order: 1
             - id: redfox-app
               uri: ${redfox.gateway.app.base-url:http://localhost:8481}
               predicates:
@@ -21,6 +26,16 @@ spring:
               predicates:
                 - Path=/**
               order: 200
+
+redfox:
+  gateway:
+    cookie:
+      secret: ${REDFOX_GATEWAY_COOKIE_SECRET:fRplKdOCutw+YqZjoDjRjuKWl0P2uFiHKniyi1Ipkok=}
+    oauth2:
+      client-id: redfox-gateway
+      client-secret: ${REDFOX_GATEWAY_OAUTH2_CLIENT_SECRET:redfox-gateway-secret}
+      authserver-url: ${REDFOX_GATEWAY_AUTHSERVER_BASE_URL:http://localhost:8483}
+      redirect-uri: ${REDFOX_GATEWAY_OAUTH2_REDIRECT_URI:http://localhost:8480/oauth2/callback}
 
 management:
   endpoints:

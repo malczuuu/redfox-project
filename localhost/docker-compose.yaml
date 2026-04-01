@@ -76,9 +76,12 @@ services:
 #    ports:
 #      - "127.0.0.1:8480:8080"
 #    environment:
-#      REDFOX_GATEWAY_AUTHSERVER_BASE-URL: http://redfox-authserver:8080
 #      REDFOX_GATEWAY_APP_BASE-URL: http://redfox-app:8080
 #      REDFOX_GATEWAY_WEBAPP_BASE-URL: http://redfox-webapp:8080
+#      REDFOX_GATEWAY_COOKIE_SECRET: fRplKdOCutw+YqZjoDjRjuKWl0P2uFiHKniyi1Ipkok=
+#      REDFOX_GATEWAY_OAUTH2_CLIENT_SECRET: redfox-gateway-secret
+#      REDFOX_GATEWAY_AUTHSERVER_BASE_URL: http://redfox-authserver:8080
+#      REDFOX_GATEWAY_OAUTH2_REDIRECT_URI: http://localhost:8480/oauth2/callback
 #    networks:
 #      - postgres
 #    depends_on:
