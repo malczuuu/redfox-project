@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit User' : 'New User' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-fields">
+    <mat-form-field appearance="outline">
+      <mat-label>Login</mat-label>
+      <input matInput formControlName="login" />
+    </mat-form-field>
+    @if (!isEdit) {
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="passhash" type="password" />
+      </mat-form-field>
+    }
+    <mat-form-field appearance="outline">
+      <mat-label>First Name</mat-label>
+      <input matInput formControlName="firstName" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Last Name</mat-label>
+      <input matInput formControlName="lastName" />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button (click)="onSubmit()" [disabled]="!form.valid">
+    {{ isEdit ? 'Update' : 'Create' }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,71 @@
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.mat-sidenav {
+  border-radius: 0 !important;
+}
+
+.mat-mdc-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.btn-things {
+  background-color: #bdbdbd !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.btn-edit {
+  background-color: #1976d2 !important;
+  color: #fff !important;
+}
+
+.btn-delete {
+  background-color: #d32f2f !important;
+  color: #fff !important;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.mat-mdc-paginator {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  .mat-mdc-paginator-container {
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 8px;
+  }
+}

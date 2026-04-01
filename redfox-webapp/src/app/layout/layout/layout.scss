@@ -1,0 +1,57 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.toolbar {
+  background: #1976d2;
+  color: #fff;
+  flex-shrink: 0;
+  z-index: 3;
+  position: relative;
+  box-shadow:
+    0 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.menu-button {
+  color: #fff;
+}
+
+.logout-button {
+  color: rgba(0, 0, 0, 0.87) !important;
+  background-color: #fff !important;
+}
+
+.app-name {
+  font-weight: 500;
+  font-size: 20px;
+  margin-left: 8px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.sidenav-container {
+  flex: 1;
+}
+
+.sidenav {
+  width: 18vw;
+  min-width: 200px;
+  max-width: 320px;
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+}
+
+.content {
+  padding: 24px;
+}
+
+.active-link {
+  background: rgba(0, 0, 0, 0.04);
+}

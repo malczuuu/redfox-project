@@ -1,0 +1,27 @@
+<mat-toolbar class="toolbar">
+  <button mat-icon-button class="menu-button" (click)="toggleSidenav()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span class="app-name">Redfox</span>
+  <span class="spacer"></span>
+  <a mat-flat-button class="logout-button" href="/logout">Logout</a>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav [mode]="sidenavMode()" [opened]="sidenavOpened()" class="sidenav">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/projects" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>folder</mat-icon>
+        <span matListItemTitle>Projects</span>
+      </a>
+      <a mat-list-item routerLink="/users" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Users</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>
