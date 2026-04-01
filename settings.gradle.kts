@@ -14,6 +14,7 @@ rootProject.name = "redfox-project"
 include(":redfox-app")
 include(":redfox-authserver")
 include(":redfox-flyway")
+include(":redfox-gateway")
 include(":redfox-libs:redfox-bom")
 include(":redfox-libs:redfox-log4j2")
 include(":redfox-libs:redfox-migration")

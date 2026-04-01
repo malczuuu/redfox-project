@@ -12,6 +12,7 @@ kotlin = "2.3.20"
 problem4j-spring = "2.2.4"
 spotless = "8.4.0"
 spring-boot = "4.0.5"
+spring-cloud = "2025.1.1"
 springdoc-openapi = "3.0.2"
 tools-jackson = "3.1.1"
 
@@ -31,6 +32,7 @@ fasterxml-jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 problem4j-spring-bom = { module = "io.github.problem4j:problem4j-spring-bom", version.ref = "problem4j-spring" }
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
 tools-jackson-bom = { module = "tools.jackson:jackson-bom", version.ref = "tools-jackson" }
 #
 #  modules managed by boms
@@ -58,6 +60,7 @@ spring-boot-starter-validation-test = { module = "org.springframework.boot:sprin
 spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
 spring-boot-starter-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
 spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
+spring-cloud-starter-gateway-server-webmvc = { module = "org.springframework.cloud:spring-cloud-starter-gateway-server-webmvc" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 tools-jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "tools-jackson" }

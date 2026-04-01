@@ -22,6 +22,73 @@ services:
       retries: 5
       start_period: 10s
 
+#  redfox-app:
+#    build:
+#      context: ../redfox-app
+#    profiles:
+#      - app
+#    ports:
+#      - "127.0.0.1:8481:8080"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/redfox
+#    networks:
+#      - postgres
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#
+#  redfox-authserver:
+#    build:
+#      context: ../redfox-authserver
+#    profiles:
+#      - app
+#    ports:
+#      - "127.0.0.1:8482:8080"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/redfox
+#    networks:
+#      - postgres
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#
+#  redfox-webapp:
+#    build:
+#      context: ../redfox-webapp
+#    profiles:
+#      - app
+#    ports:
+#      - "127.0.0.1:8482:8080"
+#    networks:
+#      - postgres
+#    healthcheck:
+#      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/ || exit 1"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 10s
+#
+#  redfox-gateway:
+#    build:
+#      context: ../redfox-gateway
+#    profiles:
+#      - app
+#    ports:
+#      - "127.0.0.1:8480:8080"
+#    environment:
+#      REDFOX_GATEWAY_AUTHSERVER_BASE-URL: http://redfox-authserver:8080
+#      REDFOX_GATEWAY_APP_BASE-URL: http://redfox-app:8080
+#      REDFOX_GATEWAY_WEBAPP_BASE-URL: http://redfox-webapp:8080
+#    networks:
+#      - postgres
+#    depends_on:
+#      redfox-authserver:
+#        condition: service_healthy
+#      redfox-app:
+#        condition: service_healthy
+#      redfox-webapp:
+#        condition: service_healthy
+
   #
   # Monitoring Profile
   #
