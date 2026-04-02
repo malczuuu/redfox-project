@@ -6,6 +6,8 @@ import io.github.problem4j.core.ProblemContext
 import io.github.problem4j.spring.webmvc.resolver.NoHandlerFoundProblemResolver
 import io.github.problem4j.spring.webmvc.resolver.NoResourceFoundProblemResolver
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -25,6 +27,7 @@ import tools.jackson.databind.json.JsonMapper
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableConfigurationProperties(AuthProperties::class)
 class SecurityConfiguration(jsonMapper: JsonMapper) {
 
   private val problemString401 =
@@ -36,12 +39,17 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
       csrf { disable() }
       sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
       authorizeHttpRequests {
-        authorize("/api/v1/**", permitAll)
+        authorize("/api/oauth2/**", permitAll)
+        authorize("/api/v1/**", authenticated)
         authorize("/actuator/**", permitAll)
         authorize("/swagger-ui/**", permitAll)
         authorize("/v3/api-docs", permitAll)
         authorize("/v3/api-docs/swagger-config", permitAll)
         authorize("/**", denyAll)
+      }
+      oauth2ResourceServer {
+        jwt {}
+        bearerTokenResolver = CookieBearerTokenResolver()
       }
       exceptionHandling {
         authenticationEntryPoint = { _, response, _ -> write401(response) }
@@ -54,6 +62,17 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
   @Bean
   fun passwordEncoder(): PasswordEncoder {
     return BCryptPasswordEncoder()
+  }
+
+  @Bean
+  fun tokenRefreshFilter(
+      authProperties: AuthProperties,
+      jsonMapper: JsonMapper,
+  ): FilterRegistrationBean<TokenRefreshFilter> {
+    val registration = FilterRegistrationBean(TokenRefreshFilter(authProperties, jsonMapper))
+    registration.order = Int.MIN_VALUE + 100
+    registration.addUrlPatterns("/api/v1/*")
+    return registration
   }
 
   @Bean

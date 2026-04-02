@@ -53,6 +53,13 @@ export class AuthService {
     );
   }
 
+  logoutFromAuthServer(): void {
+    const params = new URLSearchParams({
+      redirect_uri: window.location.origin,
+    });
+    window.location.href = `${this.authServerUrl}/api/logout?${params.toString()}`;
+  }
+
   isAuthenticated(): boolean {
     return sessionStorage.getItem('authenticated') === 'true';
   }

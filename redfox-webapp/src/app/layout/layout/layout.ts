@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -35,6 +35,7 @@ export class Layout implements OnInit, OnDestroy {
   constructor(
     private readonly breakpointObserver: BreakpointObserver,
     private readonly authService: AuthService,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -65,8 +66,8 @@ export class Layout implements OnInit, OnDestroy {
 
   protected logout(): void {
     this.authService.logout().subscribe({
-      next: () => this.authService.login(),
-      error: () => this.authService.login(),
+      next: () => this.authService.logoutFromAuthServer(),
+      error: () => this.authService.logoutFromAuthServer(),
     });
   }
 }

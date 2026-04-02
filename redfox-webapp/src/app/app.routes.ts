@@ -1,7 +1,13 @@
 import { Routes } from '@angular/router';
 import { Layout } from './layout/layout/layout';
+import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./pages/home/home').then((m) => m.Home),
+  },
   {
     path: 'oauth2/callback',
     loadComponent: () =>
@@ -10,8 +16,8 @@ export const routes: Routes = [
   {
     path: '',
     component: Layout,
+    canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'projects', pathMatch: 'full' },
       {
         path: 'projects',
         loadComponent: () => import('./pages/projects/project-list').then((m) => m.ProjectList),

@@ -17,11 +17,11 @@ export class OAuth2Callback implements OnInit {
     const code = this.route.snapshot.queryParamMap.get('code');
     if (code) {
       this.authService.exchangeCode(code).subscribe({
-        next: () => this.router.navigate(['/']),
-        error: () => this.authService.login(),
+        next: () => this.router.navigate(['/projects']),
+        error: () => this.router.navigate(['/']),
       });
     } else {
-      this.authService.login();
+      this.router.navigate(['/']);
     }
   }
 }
