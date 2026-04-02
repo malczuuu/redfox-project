@@ -7,6 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -31,7 +32,10 @@ export class Layout implements OnInit, OnDestroy {
 
   private breakpointSub!: Subscription;
 
-  constructor(private readonly breakpointObserver: BreakpointObserver) {}
+  constructor(
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.breakpointSub = this.breakpointObserver
@@ -57,5 +61,12 @@ export class Layout implements OnInit, OnDestroy {
 
   protected toggleSidenav(): void {
     this.sidenav.toggle();
+  }
+
+  protected logout(): void {
+    this.authService.logout().subscribe({
+      next: () => this.authService.login(),
+      error: () => this.authService.login(),
+    });
   }
 }

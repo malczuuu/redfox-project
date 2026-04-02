@@ -3,6 +3,11 @@ import { Layout } from './layout/layout/layout';
 
 export const routes: Routes = [
   {
+    path: 'oauth2/callback',
+    loadComponent: () =>
+      import('./pages/oauth2-callback/oauth2-callback').then((m) => m.OAuth2Callback),
+  },
+  {
     path: '',
     component: Layout,
     children: [
