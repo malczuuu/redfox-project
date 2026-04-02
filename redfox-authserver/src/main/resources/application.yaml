@@ -27,9 +27,9 @@ spring:
       authorizationserver:
         issuer: ${REDFOX_AUTHSERVER_ISSUER:http://localhost:8483}
         client:
-          redfox-gateway:
+          webapp-client:
             registration:
-              client-id: redfox-gateway
+              client-id: webapp-client
               client-secret: "{bcrypt}$2b$12$z2I9UU/FZuhBaZzgegtUqePMo/Z1HetY8SlGzVwYLaeUeowvu8AI2"
               client-authentication-methods:
                 - client_secret_basic
