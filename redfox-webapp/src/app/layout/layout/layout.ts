@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -31,7 +32,11 @@ export class Layout implements OnInit, OnDestroy {
 
   private breakpointSub!: Subscription;
 
-  constructor(private readonly breakpointObserver: BreakpointObserver) {}
+  constructor(
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.breakpointSub = this.breakpointObserver
@@ -57,5 +62,12 @@ export class Layout implements OnInit, OnDestroy {
 
   protected toggleSidenav(): void {
     this.sidenav.toggle();
+  }
+
+  protected logout(): void {
+    this.authService.logout().subscribe({
+      next: () => this.authService.logoutFromAuthServer(),
+      error: () => this.authService.logoutFromAuthServer(),
+    });
   }
 }

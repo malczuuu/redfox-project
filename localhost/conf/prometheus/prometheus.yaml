@@ -11,7 +11,3 @@ scrape_configs:
     metrics_path: "/actuator/prometheus"
     static_configs:
       - targets: ["redfox-authserver:8080"]
-  - job_name: "redfox-gateway"
-    metrics_path: "/actuator/prometheus"
-    static_configs:
-      - targets: ["redfox-gateway:8080"]

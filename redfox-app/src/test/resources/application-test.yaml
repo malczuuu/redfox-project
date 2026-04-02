@@ -6,6 +6,18 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
     out-of-order: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:0
+
+redfox:
+  auth:
+    authserver-token-uri: http://localhost:0/oauth2/token
+    client-id: webapp-client
+    cookie-domain: localhost
+    cookie-secure: false
 
 logging:
   level:

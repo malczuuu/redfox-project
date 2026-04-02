@@ -22,6 +22,18 @@ spring:
   validation:
     method:
       adapt-constraint-violations: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${REDFOX_AUTHSERVER_ISSUER:http://localhost:8483}
+
+redfox:
+  auth:
+    authserver-token-uri: ${REDFOX_AUTHSERVER_TOKEN_URI:http://localhost:8483/oauth2/token}
+    client-id: webapp-client
+    cookie-domain: ${REDFOX_AUTH_COOKIE_DOMAIN:localhost}
+    cookie-secure: ${REDFOX_AUTH_COOKIE_SECURE:false}
 
 management:
   endpoints:
