@@ -2,7 +2,6 @@ package io.github.malczuuu.redfox.app
 
 import java.time.Instant
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -14,7 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.web.SecurityFilterChain
 
 @Profile("test")
-@Configuration
+// @Configuration
 class TestSecurityConfiguration {
 
   @Bean

@@ -2,35 +2,44 @@ package io.github.malczuuu.redfox.authserver.security
 
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
-import io.github.malczuuu.redfox.authserver.config.AuthServerProperties
-import java.time.Clock
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.http.MediaType
+import org.springframework.jdbc.core.JdbcOperations
 import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.jackson.SecurityJacksonModules
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder
-import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService.JsonMapperOAuth2AuthorizationParametersMapper
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService.JsonMapperOAuth2AuthorizationRowMapper
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator
 import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator
+import org.springframework.security.oauth2.server.authorization.token.OAuth2RefreshTokenGenerator
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
+import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession
+import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 @EnableWebSecurity
-class AuthServerSecurityConfiguration(private val authServerProperties: AuthServerProperties) {
+@EnableJdbcHttpSession
+class AuthServerSecurityConfiguration {
 
   @Bean
-  @Order(1)
+  @Order(1000)
   fun authorizationServerFilterChain(
       http: HttpSecurity,
       tokenGenerator: OAuth2TokenGenerator<*>,
@@ -54,7 +63,7 @@ class AuthServerSecurityConfiguration(private val authServerProperties: AuthServ
   }
 
   @Bean
-  @Order(2)
+  @Order(2000)
   fun defaultSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
     http {
       authorizeHttpRequests {
@@ -63,7 +72,9 @@ class AuthServerSecurityConfiguration(private val authServerProperties: AuthServ
         authorize("/actuator/**", permitAll)
         authorize(anyRequest, authenticated)
       }
-      formLogin { authenticationSuccessHandler = RememberMeSuccessHandler() }
+      formLogin {
+        // authenticationSuccessHandler = RememberMeSuccessHandler()
+      }
       logout {
         logoutSuccessUrl = "/login?logout"
         permitAll()
@@ -74,18 +85,49 @@ class AuthServerSecurityConfiguration(private val authServerProperties: AuthServ
   }
 
   @Bean
-  fun authorizationService(): OAuth2AuthorizationService =
-      RememberMeAuthorizationService(InMemoryOAuth2AuthorizationService())
+  fun authorizationService(
+      jdbcOperations: JdbcOperations,
+      registeredClientRepository: RegisteredClientRepository,
+  ): OAuth2AuthorizationService {
+    val jsonMapper = getSecurityJsonMapper()
+
+    val authorizationService =
+        JdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository)
+    authorizationService.setAuthorizationRowMapper(
+        JsonMapperOAuth2AuthorizationRowMapper(registeredClientRepository, jsonMapper)
+    )
+    authorizationService.setAuthorizationParametersMapper(
+        JsonMapperOAuth2AuthorizationParametersMapper(jsonMapper)
+    )
+
+    return authorizationService
+  }
 
   @Bean
-  fun tokenGenerator(jwkSource: JWKSource<SecurityContext>, clock: Clock): OAuth2TokenGenerator<*> {
+  fun authorizationConsentService(
+      jdbcOperations: JdbcOperations,
+      registeredClientRepository: RegisteredClientRepository,
+  ): OAuth2AuthorizationConsentService =
+      JdbcOAuth2AuthorizationConsentService(jdbcOperations, registeredClientRepository)
+
+  @Bean
+  fun tokenGenerator(jwkSource: JWKSource<SecurityContext>): OAuth2TokenGenerator<*> {
     val jwtGenerator = JwtGenerator(NimbusJwtEncoder(jwkSource))
     return DelegatingOAuth2TokenGenerator(
         jwtGenerator,
         OAuth2AccessTokenGenerator(),
-        RememberMeRefreshTokenGenerator(authServerProperties, clock),
+        OAuth2RefreshTokenGenerator(),
     )
   }
 
   @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+
+  private fun getSecurityJsonMapper(): JsonMapper =
+      JsonMapper.builder()
+          .addModules(
+              SecurityJacksonModules.getModules(
+                  AuthServerSecurityConfiguration::class.java.classLoader
+              )
+          )
+          .build()
 }

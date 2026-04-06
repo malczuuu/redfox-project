@@ -20,7 +20,7 @@ export class AuthService {
       response_type: 'code',
       client_id: this.clientId,
       redirect_uri: this.redirectUri,
-      scope: 'openid',
+      scope: 'openid profile',
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
     });
@@ -62,6 +62,10 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return sessionStorage.getItem('authenticated') === 'true';
+  }
+
+  whoami(): Observable<any> {
+    return this.http.get('/api/v1/whoami');
   }
 
   private generateCodeVerifier(): string {

@@ -48,7 +48,9 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
         authorize("/**", denyAll)
       }
       oauth2ResourceServer {
-        jwt {}
+        jwt {
+          // jwtAuthenticationConverter = ...
+        }
         bearerTokenResolver = CookieBearerTokenResolver()
       }
       exceptionHandling {
@@ -59,10 +61,7 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
     return http.build()
   }
 
-  @Bean
-  fun passwordEncoder(): PasswordEncoder {
-    return BCryptPasswordEncoder()
-  }
+  @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
   @Bean
   fun tokenRefreshFilter(
@@ -76,14 +75,12 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
   }
 
   @Bean
-  fun noHandlerFoundProblemResolver(): NoHandlerFoundProblemResolver {
-    return ExtNoHandlerFoundProblemResolver()
-  }
+  fun noHandlerFoundProblemResolver(): NoHandlerFoundProblemResolver =
+      ExtNoHandlerFoundProblemResolver()
 
   @Bean
-  fun noResourceFoundProblemResolver(): NoResourceFoundProblemResolver {
-    return ExtNoResourceFoundProblemResolver()
-  }
+  fun noResourceFoundProblemResolver(): NoResourceFoundProblemResolver =
+      ExtNoResourceFoundProblemResolver()
 
   private fun write401(response: HttpServletResponse) {
     response.status = HttpStatus.UNAUTHORIZED.value()
@@ -97,9 +94,7 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
         ex: Exception,
         headers: HttpHeaders,
         status: HttpStatusCode,
-    ): ProblemBuilder {
-      return Problem.builder().status(HttpStatus.UNAUTHORIZED.value())
-    }
+    ): ProblemBuilder = Problem.builder().status(HttpStatus.UNAUTHORIZED.value())
   }
 
   private open class ExtNoResourceFoundProblemResolver : NoResourceFoundProblemResolver() {
@@ -108,8 +103,6 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
         ex: Exception,
         headers: HttpHeaders,
         status: HttpStatusCode,
-    ): ProblemBuilder {
-      return Problem.builder().status(HttpStatus.UNAUTHORIZED.value())
-    }
+    ): ProblemBuilder = Problem.builder().status(HttpStatus.UNAUTHORIZED.value())
   }
 }

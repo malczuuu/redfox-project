@@ -2,6 +2,7 @@ package io.github.malczuuu.redfox.authserver.core
 
 import io.github.malczuuu.redfox.authserver.domain.UserRepository
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -15,6 +16,7 @@ class UserDetailsServiceImpl(private val userRepository: UserRepository) : UserD
         userRepository.findByLogin(username).orElseThrow {
           UsernameNotFoundException.fromUsername(username)
         }
-    return UserPrincipal(user.login, user.passhash, listOf(SimpleGrantedAuthority("ROLE_USER")))
+
+    return User(user.login, user.passhash, listOf(SimpleGrantedAuthority("ROLE_USER")))
   }
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AuthProperties(
     val authserverTokenUri: String,
     val clientId: String,
+    val clientSecret: String,
     val cookieDomain: String,
     val cookieSecure: Boolean,
 )

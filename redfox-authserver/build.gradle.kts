@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.spring.boot.starter.oauth2.authorization.server)
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.session.jdbc)
     implementation(libs.micrometer.registry.prometheus)
 
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
