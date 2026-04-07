@@ -18,9 +18,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import tools.jackson.databind.json.JsonMapper
 
 @Configuration
@@ -33,9 +35,14 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
       jsonMapper.writeValueAsString(Problem.of(HttpStatus.UNAUTHORIZED.value()))
 
   @Bean
-  fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+  fun securityFilterChain(
+      http: HttpSecurity,
+      authProperties: AuthProperties,
+      userDetailsService: UserDetailsService,
+  ): SecurityFilterChain {
     http {
       csrf { disable() }
+
       sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
       authorizeHttpRequests {
         authorize("/api/oauth2/**", permitAll)
@@ -48,10 +55,19 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
       }
       oauth2ResourceServer {
         jwt {
-          // jwtAuthenticationConverter = ...
+          jwtAuthenticationConverter = {
+            val login = it.subject
+            val user = userDetailsService.loadUserByUsername(login)
+            PreAuthenticatedAuthenticationToken(user, it.tokenValue, user.authorities)
+          }
         }
         bearerTokenResolver = CookieBearerTokenResolver()
       }
+
+      if (authProperties.basic.enabled) {
+        httpBasic {}
+      }
+
       exceptionHandling {
         authenticationEntryPoint = { _, response, _ -> write401(response) }
         accessDeniedHandler = { _, response, _ -> write401(response) }
@@ -60,7 +76,9 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
     return http.build()
   }
 
-  @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+  @Bean
+  fun passwordEncoder(): PasswordEncoder =
+      PasswordEncoderFactories.createDelegatingPasswordEncoder()
 
   @Bean
   fun noHandlerFoundProblemResolver(): NoHandlerFoundProblemResolver =

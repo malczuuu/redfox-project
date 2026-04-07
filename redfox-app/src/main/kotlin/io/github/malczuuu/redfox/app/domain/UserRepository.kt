@@ -32,4 +32,7 @@ interface UserRepository : JpaRepository<UserEntity, UUID> {
       """
   )
   fun existsByLogin(login: String): Boolean
+
+  @Query("SELECT u FROM UserEntity u WHERE u.login = :username AND u.deletedAt IS NULL")
+  fun findByLogin(username: String): Optional<UserEntity>
 }

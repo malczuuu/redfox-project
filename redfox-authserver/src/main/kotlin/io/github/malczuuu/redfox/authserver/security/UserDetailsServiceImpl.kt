@@ -1,4 +1,4 @@
-package io.github.malczuuu.redfox.authserver.core
+package io.github.malczuuu.redfox.authserver.security
 
 import io.github.malczuuu.redfox.authserver.domain.UserRepository
 import org.springframework.security.core.authority.SimpleGrantedAuthority

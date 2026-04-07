@@ -2,7 +2,7 @@ package io.github.malczuuu.redfox.app.rest
 
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController
 class WhoamiController {
 
   @GetMapping
-  fun whoami(@AuthenticationPrincipal principal: Jwt?): ResponseEntity<Map<String, Any?>> {
+  fun whoami(@AuthenticationPrincipal principal: UserDetails): ResponseEntity<Map<String, Any?>> {
     val responseBody = mutableMapOf<String, Any?>()
-    principal?.let { responseBody["login"] = principal.claims["sub"] }
+    principal.let { responseBody["login"] = principal.username }
     return ResponseEntity.ok(responseBody)
   }
 }

@@ -10,9 +10,11 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.PositiveOrZero
 import java.util.UUID
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,11 +33,19 @@ import org.springframework.web.util.UriComponentsBuilder
 @RequestMapping("/api/v1/projects")
 class ProjectController(private val projectService: ProjectService) {
 
+  companion object {
+    private val log = LoggerFactory.getLogger(ProjectController::class.java)
+  }
+
   @GetMapping
   fun getProjects(
       @RequestParam(defaultValue = "0") @PositiveOrZero page: Int,
       @RequestParam(defaultValue = "20") @Positive size: Int,
-  ): PageResult<ProjectDto> = projectService.getProjects(PageRequest.of(page, size))
+      @AuthenticationPrincipal principal: Any,
+  ): PageResult<ProjectDto> {
+    log.info("Principal: {}", principal)
+    return projectService.getProjects(PageRequest.of(page, size))
+  }
 
   @GetMapping("/{id}")
   fun getProject(@PathVariable id: UUID): ProjectDto = projectService.getProject(id)

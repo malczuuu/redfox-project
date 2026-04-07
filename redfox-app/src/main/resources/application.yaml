@@ -35,6 +35,8 @@ redfox:
     client-secret: webapp-secret
     cookie-domain: localhost
     cookie-secure: false
+    basic:
+      enabled: true
 
 management:
   endpoints:
@@ -46,6 +48,10 @@ management:
       show-details: always
       probes:
         enabled: true
+
+logging:
+  level:
+    io.github.malczuuu.redfox: DEBUG
 
 problem4j:
   detail-format: lowercase

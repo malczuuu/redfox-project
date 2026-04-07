@@ -54,8 +54,23 @@ class UserControllerTests : PostgresAwareTest {
     userRepository.deleteAll()
 
     user =
-        UserEntity(login = "john.doe", passhash = "hash123", firstName = "John", lastName = "Doe")
-    user = userRepository.save(user)
+        userRepository.save(
+            UserEntity(
+                login = "admin",
+                passhash = "{noop}admin",
+                firstName = "Admin",
+                lastName = "Admin",
+            )
+        )
+
+    restClient =
+        restClient
+            .mutate()
+            .requestInterceptor { request, bytes, execution ->
+              request.headers.setBasicAuth("admin", "admin")
+              execution.execute(request, bytes)
+            }
+            .build()
   }
 
   @Nested
@@ -203,7 +218,6 @@ class UserControllerTests : PostgresAwareTest {
 
     @BeforeEach
     fun beforeEach() {
-      userRepository.deleteAll()
       repeat(PAGINATION_LIST_SIZE) { i ->
         userRepository.save(
             UserEntity(

@@ -9,4 +9,9 @@ data class AuthProperties(
     val clientSecret: String,
     val cookieDomain: String,
     val cookieSecure: Boolean,
-)
+    val passwordEncoder: String = "bcrypt",
+    val basic: Basic = Basic(),
+) {
+
+  data class Basic(val enabled: Boolean = false)
+}

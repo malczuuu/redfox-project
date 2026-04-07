@@ -10,14 +10,16 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:0
+          issuer-uri: http://localhost
 
 redfox:
   auth:
-    authserver-token-uri: http://localhost:0/oauth2/token
+    authserver-token-uri: http://localhost/oauth2/token
     client-id: webapp-client
     cookie-domain: localhost
     cookie-secure: false
+    basic:
+      enabled: true
 
 logging:
   level:

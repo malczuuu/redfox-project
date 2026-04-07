@@ -10,6 +10,8 @@ import io.github.malczuuu.redfox.app.domain.ProjectEntity
 import io.github.malczuuu.redfox.app.domain.ProjectRepository
 import io.github.malczuuu.redfox.app.domain.ThingEntity
 import io.github.malczuuu.redfox.app.domain.ThingRepository
+import io.github.malczuuu.redfox.app.domain.UserEntity
+import io.github.malczuuu.redfox.app.domain.UserRepository
 import io.github.problem4j.core.Problem
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -45,6 +47,7 @@ class ProjectControllerTests : PostgresAwareTest {
   @Autowired private lateinit var restClient: RestTestClient
   @Autowired private lateinit var projectRepository: ProjectRepository
   @Autowired private lateinit var thingRepository: ThingRepository
+  @Autowired private lateinit var userRepository: UserRepository
   @Autowired private lateinit var jsonMapper: JsonMapper
 
   private lateinit var project: ProjectEntity
@@ -53,9 +56,28 @@ class ProjectControllerTests : PostgresAwareTest {
   fun beforeEach() {
     thingRepository.deleteAll()
     projectRepository.deleteAll()
+    userRepository.deleteAll()
 
     project = ProjectEntity(code = "P101", name = "Test Project", description = "Test description")
     project = projectRepository.save(project)
+
+    userRepository.save(
+        UserEntity(
+            login = "admin",
+            passhash = "{noop}admin",
+            firstName = "Admin",
+            lastName = "Admin",
+        )
+    )
+
+    restClient =
+        restClient
+            .mutate()
+            .requestInterceptor { request, bytes, execution ->
+              request.headers.setBasicAuth("admin", "admin")
+              execution.execute(request, bytes)
+            }
+            .build()
   }
 
   @Nested

@@ -38,7 +38,7 @@ spring:
           webapp-client:
             registration:
               client-id: webapp-client
-              client-secret: $2a$12$ZL6Gh4VdRlParif6TaWXQuvnVERcyeTx3t1W1/5YA.Vjrr/eMTUxm
+              client-secret: '{bcrypt}$2a$12$ZL6Gh4VdRlParif6TaWXQuvnVERcyeTx3t1W1/5YA.Vjrr/eMTUxm'
               client-authentication-methods:
                 - client_secret_post
               authorization-grant-types:
@@ -69,6 +69,10 @@ management:
       show-details: always
       probes:
         enabled: true
+
+logging:
+  level:
+    io.github.malczuuu.redfox: DEBUG
 
 problem4j:
   detail-format: lowercase
