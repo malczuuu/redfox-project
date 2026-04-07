@@ -6,8 +6,8 @@
 
 | Application           | Port | Description                                                                                                                                                                                                                                                                                     |
 |-----------------------|------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **redfox-webapp**     | 8482 | Angular SPA. Entry point for the user. Initiates the OAuth2 PKCE flow, handles the authorization callback, and calls the resource API. Manages Projects, Things, and Users.                                                                                                                     |
 | **redfox-app**        | 8481 | Spring Boot resource server. Exposes the REST API and acts as a backend-for-frontend (BFF) for token operations - it holds the client secret and proxies token exchange and refresh requests to the authserver, keeping credentials off the browser. Validates JWTs on every protected request. |
+| **redfox-webapp**     | 8482 | Angular SPA. Entry point for the user. Initiates the OAuth2 PKCE flow, handles the authorization callback, and calls the resource API. Manages Projects, Things, and Users.                                                                                                                     |
 | **redfox-authserver** | 8483 | Spring Authorization Server (OAuth2/OIDC). Authenticates users via a login form, issues short-lived access tokens (2 min) and long-lived refresh tokens (30 days). Sessions and authorizations are persisted in PostgreSQL.                                                                     |
 
 ## Authentication Flow
