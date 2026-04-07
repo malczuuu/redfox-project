@@ -16,10 +16,6 @@ class CookieBearerTokenResolver : BearerTokenResolver {
     if (request.requestURI.startsWith("/api/oauth2/")) {
       return null
     }
-    val refreshedToken = request.getAttribute(TokenRefreshFilter.REFRESHED_TOKEN_ATTR) as? String
-    if (refreshedToken != null) {
-      return refreshedToken
-    }
     val headerToken = defaultResolver.resolve(request)
     if (headerToken != null) {
       return headerToken

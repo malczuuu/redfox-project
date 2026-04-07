@@ -7,7 +7,6 @@ import io.github.problem4j.spring.webmvc.resolver.NoHandlerFoundProblemResolver
 import io.github.problem4j.spring.webmvc.resolver.NoResourceFoundProblemResolver
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -62,17 +61,6 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
   }
 
   @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
-
-  @Bean
-  fun tokenRefreshFilter(
-      authProperties: AuthProperties,
-      jsonMapper: JsonMapper,
-  ): FilterRegistrationBean<TokenRefreshFilter> {
-    val registration = FilterRegistrationBean(TokenRefreshFilter(authProperties, jsonMapper))
-    registration.order = Int.MIN_VALUE
-    registration.addUrlPatterns("/api/v1/*")
-    return registration
-  }
 
   @Bean
   fun noHandlerFoundProblemResolver(): NoHandlerFoundProblemResolver =
