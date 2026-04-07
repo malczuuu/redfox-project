@@ -41,7 +41,7 @@ class DiagnosticInspector(private val meterRegistry: MeterRegistry) : AdviceWebM
 
     meterRegistry.counter(REST_ERRORS_METRIC, tags).increment()
 
-    var builder = log.atError()
+    var builder = if (status.is4xxClientError) log.atInfo() else log.atError()
     tags.forEach { tag -> builder = builder.addKeyValue(tag.key, tag.value) }
 
     if (log.isDebugEnabled) {

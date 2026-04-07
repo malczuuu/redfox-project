@@ -2,48 +2,35 @@ package io.github.malczuuu.redfox.app.rest
 
 import io.github.malczuuu.redfox.app.security.AuthProperties
 import io.github.malczuuu.redfox.app.security.CookieBearerTokenResolver
+import io.github.malczuuu.redfox.app.security.OAuth2Service
+import io.github.malczuuu.redfox.app.security.TokenDto
 import io.github.malczuuu.redfox.app.security.TokenExchangeDto
 import io.github.problem4j.core.Problem
 import io.github.problem4j.core.ProblemException
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.RestClient
-import tools.jackson.databind.JsonNode
-import tools.jackson.databind.json.JsonMapper
 
 @RestController
 @RequestMapping("/api/oauth2")
 class OAuth2Controller(
+    private val oauth2Service: OAuth2Service,
     private val authProperties: AuthProperties,
-    private val jsonMapper: JsonMapper,
 ) {
-
-  private val restClient = RestClient.create()
 
   @PostMapping("/token")
   fun exchangeToken(
       @RequestBody request: TokenExchangeDto,
       response: HttpServletResponse,
   ): ResponseEntity<Void> {
-    val formData = LinkedMultiValueMap<String, String>()
-    formData.add("grant_type", "authorization_code")
-    formData.add("code", request.code)
-    formData.add("redirect_uri", request.redirectUri)
-    formData.add("client_id", authProperties.clientId)
-    formData.add("client_secret", authProperties.clientSecret)
-    formData.add("code_verifier", request.codeVerifier)
-
-    val tokenResponse = callTokenEndpoint(formData)
+    val tokenResponse =
+        oauth2Service.exchangeToken(request.code, request.redirectUri, request.codeVerifier)
     setTokenCookies(tokenResponse, response)
     return ResponseEntity.noContent().build()
   }
@@ -56,14 +43,7 @@ class OAuth2Controller(
     val refreshToken =
         request.cookies?.firstOrNull { it.name == REFRESH_TOKEN_COOKIE }?.value
             ?: throw ProblemException(Problem.of(HttpStatus.UNAUTHORIZED.value()))
-
-    val formData = LinkedMultiValueMap<String, String>()
-    formData.add("grant_type", "refresh_token")
-    formData.add("refresh_token", refreshToken)
-    formData.add("client_id", authProperties.clientId)
-    formData.add("client_secret", authProperties.clientSecret)
-
-    val tokenResponse = callTokenEndpoint(formData)
+    val tokenResponse = oauth2Service.refreshToken(refreshToken)
     setTokenCookies(tokenResponse, response)
     return ResponseEntity.noContent().build()
   }
@@ -75,37 +55,21 @@ class OAuth2Controller(
     return ResponseEntity.noContent().build()
   }
 
-  private fun callTokenEndpoint(formData: LinkedMultiValueMap<String, String>): JsonNode {
-    val body =
-        restClient
-            .post()
-            .uri(authProperties.authserverTokenUri)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .body(formData)
-            .retrieve()
-            .body(String::class.java)!!
-    return jsonMapper.readTree(body)
-  }
-
-  private fun setTokenCookies(tokenResponse: JsonNode, response: HttpServletResponse) {
-    val accessToken = tokenResponse.get("access_token").stringValue()
-    val refreshToken = tokenResponse.get("refresh_token")?.stringValue()
-    val expiresIn = tokenResponse.get("expires_in")?.asInt() ?: 1800
-
-    val accessCookie = Cookie(CookieBearerTokenResolver.ACCESS_TOKEN_COOKIE, accessToken)
+  private fun setTokenCookies(token: TokenDto, response: HttpServletResponse) {
+    val accessCookie = Cookie(CookieBearerTokenResolver.ACCESS_TOKEN_COOKIE, token.accessToken)
     accessCookie.isHttpOnly = true
     accessCookie.secure = authProperties.cookieSecure
     accessCookie.path = "/"
-    accessCookie.maxAge = expiresIn
+    accessCookie.maxAge = token.expiresIn
     accessCookie.setAttribute("SameSite", "Lax")
     response.addCookie(accessCookie)
 
-    if (refreshToken != null) {
-      val refreshCookie = Cookie(REFRESH_TOKEN_COOKIE, refreshToken)
+    if (token.refreshToken != null) {
+      val refreshCookie = Cookie(REFRESH_TOKEN_COOKIE, token.refreshToken)
       refreshCookie.isHttpOnly = true
       refreshCookie.secure = authProperties.cookieSecure
       refreshCookie.path = "/"
-      refreshCookie.maxAge = 8 * 3600
+      refreshCookie.maxAge = authProperties.refreshCookieMaxAge.toSeconds().toInt()
       refreshCookie.setAttribute("SameSite", "Lax")
       response.addCookie(refreshCookie)
     }
@@ -115,13 +79,13 @@ class OAuth2Controller(
     val cookie = Cookie(name, "")
     cookie.isHttpOnly = true
     cookie.secure = authProperties.cookieSecure
-    cookie.path = if (name == REFRESH_TOKEN_COOKIE) "/" else "/"
+    cookie.path = "/"
     cookie.maxAge = 0
     cookie.setAttribute("SameSite", "Lax")
     response.addCookie(cookie)
   }
 
   companion object {
-    private const val REFRESH_TOKEN_COOKIE = "redfox_refresh_token"
+    const val REFRESH_TOKEN_COOKIE = "redfox_refresh_token"
   }
 }

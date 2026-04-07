@@ -35,6 +35,7 @@ redfox:
     client-secret: webapp-secret
     cookie-domain: localhost
     cookie-secure: false
+    refresh-cookie-max-age: 31d
     basic:
       enabled: true
 

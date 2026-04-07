@@ -14,7 +14,7 @@ class WhoamiController {
   @GetMapping
   fun whoami(@AuthenticationPrincipal principal: UserDetails): ResponseEntity<Map<String, Any?>> {
     val responseBody = mutableMapOf<String, Any?>()
-    principal.let { responseBody["login"] = principal.username }
+    responseBody["login"] = principal.username
     return ResponseEntity.ok(responseBody)
   }
 }

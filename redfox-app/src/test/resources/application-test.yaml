@@ -18,6 +18,7 @@ redfox:
     client-id: webapp-client
     cookie-domain: localhost
     cookie-secure: false
+    refresh-cookie-max-age: 30h
     basic:
       enabled: true
 

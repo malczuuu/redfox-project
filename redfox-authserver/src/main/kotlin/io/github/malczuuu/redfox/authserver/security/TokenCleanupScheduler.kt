@@ -2,12 +2,14 @@ package io.github.malczuuu.redfox.authserver.security
 
 import java.time.Clock
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
+@ConditionalOnBooleanProperty("redfox.token-cleanup.enabled")
 class TokenCleanupScheduler(
     private val jdbcTemplate: JdbcTemplate,
     private val clock: Clock,
@@ -17,7 +19,7 @@ class TokenCleanupScheduler(
     private val log = LoggerFactory.getLogger(TokenCleanupScheduler::class.java)
   }
 
-  @Scheduled(cron = "0 * * * * *")
+  @Scheduled(cron = $$"${redfox.token-cleanup.cron:0 0/30 * * * *}")
   @Transactional
   fun cleanupExpiredTokens() {
     val now = clock.instant()
@@ -33,6 +35,6 @@ class TokenCleanupScheduler(
 
     val rowsDeleted = jdbcTemplate.update(sql, now, now, now)
 
-    log.debug("Cleaned up count={} expired tokens from oauth2_authorization table", rowsDeleted)
+    log.info("Cleaned up count={} expired tokens from oauth2_authorization table", rowsDeleted)
   }
 }

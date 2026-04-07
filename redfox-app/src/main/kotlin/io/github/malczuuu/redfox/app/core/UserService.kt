@@ -42,7 +42,7 @@ class UserService(
     var user =
         UserEntity(
             login = request.login,
-            passhash = passwordEncoder.encode(request.passhash)!!,
+            passhash = passwordEncoder.encode(request.password)!!,
             firstName = request.firstName,
             lastName = request.lastName,
         )

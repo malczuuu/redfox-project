@@ -271,7 +271,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "passX",
+              "password" to "passX",
               "firstName" to "Alice",
               "lastName" to "Smith",
           )
@@ -307,7 +307,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to user.login,
-              "passhash" to "pass",
+              "password" to "pass",
               "firstName" to "John",
               "lastName" to "Doe",
           )
@@ -339,7 +339,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to null,
-              "passhash" to "pass",
+              "password" to "pass",
               "firstName" to "John",
               "lastName" to "Doe",
           )
@@ -371,7 +371,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "",
-              "passhash" to "pass",
+              "password" to "pass",
               "firstName" to "John",
               "lastName" to "Doe",
           )
@@ -406,7 +406,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "a".repeat(256),
-              "passhash" to "pass",
+              "password" to "pass",
               "firstName" to "John",
               "lastName" to "Doe",
           )
@@ -443,7 +443,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to null,
+              "password" to null,
               "firstName" to "Alice",
               "lastName" to "Smith",
           )
@@ -465,7 +465,7 @@ class UserControllerTests : PostgresAwareTest {
               Problem.builder()
                   .status(HttpStatus.BAD_REQUEST.value())
                   .detail("type mismatch")
-                  .extension("property", "passhash")
+                  .extension("property", "password")
                   .build()
           )
     }
@@ -475,7 +475,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "",
+              "password" to "",
               "firstName" to "Alice",
               "lastName" to "Smith",
           )
@@ -499,7 +499,7 @@ class UserControllerTests : PostgresAwareTest {
                   .detail("validation failed")
                   .extension(
                       "errors",
-                      listOf(mapOf("field" to "passhash", "error" to "must not be blank")),
+                      listOf(mapOf("field" to "password", "error" to "must not be blank")),
                   )
                   .build()
           )
@@ -510,7 +510,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "a".repeat(256),
+              "password" to "a".repeat(256),
               "firstName" to "Alice",
               "lastName" to "Smith",
           )
@@ -535,7 +535,7 @@ class UserControllerTests : PostgresAwareTest {
                   .extension(
                       "errors",
                       listOf(
-                          mapOf("field" to "passhash", "error" to "size must be between 0 and 255")
+                          mapOf("field" to "password", "error" to "size must be between 0 and 255")
                       ),
                   )
                   .build()
@@ -547,7 +547,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "passX",
+              "password" to "passX",
               "firstName" to null,
               "lastName" to "Smith",
           )
@@ -579,7 +579,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "passX",
+              "password" to "passX",
               "firstName" to "",
               "lastName" to "Smith",
           )
@@ -614,7 +614,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "passX",
+              "password" to "passX",
               "firstName" to "a".repeat(256),
               "lastName" to "Smith",
           )
@@ -651,7 +651,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "passX",
+              "password" to "passX",
               "firstName" to "Alice",
               "lastName" to null,
           )
@@ -683,7 +683,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "passX",
+              "password" to "passX",
               "firstName" to "Alice",
               "lastName" to "",
           )
@@ -718,7 +718,7 @@ class UserControllerTests : PostgresAwareTest {
       val requestBody =
           mapOf(
               "login" to "alice",
-              "passhash" to "passX",
+              "password" to "passX",
               "firstName" to "Alice",
               "lastName" to "a".repeat(256),
           )

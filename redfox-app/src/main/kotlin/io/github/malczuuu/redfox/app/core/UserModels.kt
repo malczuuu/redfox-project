@@ -18,7 +18,7 @@ data class UserDto(
 
 data class CreateUserDto(
     @field:NotBlank @field:Size(max = 255) val login: String,
-    @field:NotBlank @field:Size(max = 255) val passhash: String,
+    @field:NotBlank @field:Size(max = 255) val password: String,
     @field:NotBlank @field:Size(max = 255) val firstName: String,
     @field:NotBlank @field:Size(max = 255) val lastName: String,
 )
