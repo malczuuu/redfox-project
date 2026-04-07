@@ -1,6 +1,11 @@
 # RedFox Project
 
+[![Gradle Build](https://github.com/malczuuu/redfox-project/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/malczuuu/redfox-project/actions/workflows/gradle-build.yml)
+
 > **Proof of Concept** - demonstrates OAuth2 PKCE authentication across a three-tier Spring Boot + Angular architecture.
+
+> Note: This project uses [`checkmate`](https://github.com/malczuuu/checkmate) library. Read its `README.md` for setup
+> as it's not published to Maven Central.
 
 ## Applications
 
