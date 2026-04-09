@@ -11,8 +11,8 @@ import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import java.util.UUID
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -30,11 +30,13 @@ class AuthController(
     private const val REFRESH_TOKEN_COOKIE = "redfox_refresh_token"
     private const val XSRF_TOKEN_COOKIE = "redfox_xsrf_token"
     private const val XSRF_TOKEN_HEADER = "X-Xsrf-Token"
-
-    private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  @PostMapping("/token")
+  @PostMapping(
+      "/token",
+      consumes = [MediaType.APPLICATION_JSON_VALUE],
+      produces = [MediaType.APPLICATION_JSON_VALUE],
+  )
   fun exchangeToken(
       @RequestBody request: TokenExchangeDto,
       response: HttpServletResponse,
@@ -46,7 +48,7 @@ class AuthController(
     return ResponseEntity.ok(token)
   }
 
-  @PostMapping("/refresh")
+  @PostMapping("/refresh", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun refreshToken(
       request: HttpServletRequest,
       response: HttpServletResponse,

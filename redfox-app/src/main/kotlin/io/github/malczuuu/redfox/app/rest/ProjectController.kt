@@ -10,11 +10,10 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.PositiveOrZero
 import java.util.UUID
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -33,24 +32,18 @@ import org.springframework.web.util.UriComponentsBuilder
 @RequestMapping("/api/v1/projects")
 class ProjectController(private val projectService: ProjectService) {
 
-  companion object {
-    private val log = LoggerFactory.getLogger(ProjectController::class.java)
-  }
-
-  @GetMapping
+  @GetMapping(produces = [APPLICATION_JSON_VALUE])
   fun getProjects(
       @RequestParam(defaultValue = "0") @PositiveOrZero page: Int,
       @RequestParam(defaultValue = "20") @Positive size: Int,
-      @AuthenticationPrincipal principal: Any,
   ): PageResult<ProjectDto> {
-    log.info("Principal: {}", principal)
     return projectService.getProjects(PageRequest.of(page, size))
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
   fun getProject(@PathVariable id: UUID): ProjectDto = projectService.getProject(id)
 
-  @PostMapping
+  @PostMapping(consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
   fun createProject(
       @RequestBody @Valid request: CreateProjectDto,
       uriBuilder: UriComponentsBuilder,
@@ -60,7 +53,7 @@ class ProjectController(private val projectService: ProjectService) {
     return ResponseEntity.created(location).body(identity)
   }
 
-  @PutMapping("/{id}")
+  @PutMapping("/{id}", consumes = [APPLICATION_JSON_VALUE])
   @ResponseStatus(HttpStatus.NO_CONTENT)
   fun updateProject(@PathVariable id: UUID, @RequestBody @Valid request: UpdateProjectDto) =
       projectService.updateProject(id, request)
