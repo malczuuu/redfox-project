@@ -35,7 +35,7 @@ sequenceDiagram
     User->>auth: Submit credentials
     auth->>Browser: Redirect to /oauth2/callback?code=<auth_code>
     Browser->>webapp: Load /oauth2/callback?code=<auth_code>
-    webapp->>app: POST /api/oauth2/token<br/>{ code, redirectUri, codeVerifier }
+    webapp->>app: POST /auth/token<br/>{ code, redirectUri, codeVerifier }
     app->>auth: POST /oauth2/token<br/>grant_type=authorization_code<br/>code=… code_verifier=…<br/>client_id=webapp-client client_secret=***
     auth-->>app: { access_token (JWT), refresh_token, expires_in }
     app-->>Browser: Set HttpOnly cookies:<br/>redfox_access_token (max-age = expires_in)<br/>redfox_refresh_token (max-age = 8h)<br/>204 No Content
@@ -58,7 +58,7 @@ sequenceDiagram
     User->>webapp: Navigate to /projects
     webapp->>app: GET /api/v1/projects<br/>(cookie: redfox_access_token - expired)
     app-->>webapp: 401 Unauthorized
-    webapp->>app: POST /api/oauth2/refresh<br/>(cookie: redfox_refresh_token)
+    webapp->>app: POST /auth/refresh<br/>(cookie: redfox_refresh_token)
     app->>auth: POST /oauth2/token<br/>grant_type=refresh_token<br/>refresh_token=… client_id=… client_secret=***
     auth-->>app: { access_token (new JWT), refresh_token (new), expires_in }
     app-->>Browser: Set updated HttpOnly cookies<br/>204 No Content

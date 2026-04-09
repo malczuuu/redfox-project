@@ -13,7 +13,7 @@ class CookieBearerTokenResolver : BearerTokenResolver {
   private val defaultResolver = DefaultBearerTokenResolver()
 
   override fun resolve(request: HttpServletRequest): String? {
-    if (request.requestURI.startsWith("/api/oauth2/")) {
+    if (request.requestURI.startsWith("/auth/")) {
       return null
     }
     val headerToken = defaultResolver.resolve(request)

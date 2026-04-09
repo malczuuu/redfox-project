@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.client.RestTestClient
 @AutoConfigureRestTestClient
 @ContainerTest
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
-class OAuth2ControllerTests : PostgresAwareTest {
+class AuthControllerTests : PostgresAwareTest {
 
   @Autowired private lateinit var restClient: RestTestClient
   @Autowired private lateinit var userRepository: UserRepository
@@ -62,7 +62,7 @@ class OAuth2ControllerTests : PostgresAwareTest {
       val response: ExchangeResult =
           restClient
               .post()
-              .uri("/api/oauth2/token")
+              .uri("/auth/token")
               .contentType(APPLICATION_JSON)
               .body(requestBody)
               .exchange()
@@ -89,7 +89,7 @@ class OAuth2ControllerTests : PostgresAwareTest {
       val response: ExchangeResult =
           restClient
               .post()
-              .uri("/api/oauth2/token")
+              .uri("/auth/token")
               .contentType(APPLICATION_JSON)
               .body(requestBody)
               .exchange()
@@ -116,7 +116,7 @@ class OAuth2ControllerTests : PostgresAwareTest {
       val response: ExchangeResult =
           restClient
               .post()
-              .uri("/api/oauth2/token")
+              .uri("/auth/token")
               .contentType(APPLICATION_JSON)
               .body(requestBody)
               .exchange()
@@ -130,6 +130,15 @@ class OAuth2ControllerTests : PostgresAwareTest {
   @Nested
   inner class TokenRefreshTests {
 
+    private lateinit var csrfToken: String
+
+    @BeforeEach
+    fun fetchCsrfToken() {
+      val result = restClient.get().uri("/actuator/health").exchange().returnResult()
+      csrfToken =
+          result.responseCookies["XSRF-TOKEN"]?.first()?.value ?: error("XSRF-TOKEN cookie not set")
+    }
+
     @Test
     fun givenValidRefreshCookie_whenRefreshToken_thenReturns204AndSetsNewCookies() {
       `when`(oauth2Service.refreshToken("valid-refresh"))
@@ -138,8 +147,12 @@ class OAuth2ControllerTests : PostgresAwareTest {
       val response: ExchangeResult =
           restClient
               .post()
-              .uri("/api/oauth2/refresh")
-              .header(HttpHeaders.COOKIE, "redfox_refresh_token=valid-refresh")
+              .uri("/auth/refresh")
+              .header(
+                  HttpHeaders.COOKIE,
+                  "redfox_refresh_token=valid-refresh; XSRF-TOKEN=$csrfToken",
+              )
+              .header("X-XSRF-TOKEN", csrfToken)
               .exchange()
               .returnResult()
 
@@ -152,10 +165,29 @@ class OAuth2ControllerTests : PostgresAwareTest {
     @Test
     fun givenMissingRefreshCookie_whenRefreshToken_thenReturns401() {
       val response: ExchangeResult =
-          restClient.post().uri("/api/oauth2/refresh").exchange().returnResult()
+          restClient
+              .post()
+              .uri("/auth/refresh")
+              .header(HttpHeaders.COOKIE, "XSRF-TOKEN=$csrfToken")
+              .header("X-XSRF-TOKEN", csrfToken)
+              .exchange()
+              .returnResult()
 
       assertThat(response.status).isEqualTo(HttpStatus.UNAUTHORIZED)
       assertThat(response.responseHeaders.contentType).isEqualTo(APPLICATION_PROBLEM_JSON)
+    }
+
+    @Test
+    fun givenMissingCsrfToken_whenRefreshToken_thenReturns403() {
+      val response: ExchangeResult =
+          restClient
+              .post()
+              .uri("/auth/refresh")
+              .header(HttpHeaders.COOKIE, "redfox_refresh_token=valid-refresh")
+              .exchange()
+              .returnResult()
+
+      assertThat(response.status).isEqualTo(HttpStatus.FORBIDDEN)
     }
 
     @Test
@@ -166,8 +198,12 @@ class OAuth2ControllerTests : PostgresAwareTest {
       val response: ExchangeResult =
           restClient
               .post()
-              .uri("/api/oauth2/refresh")
-              .header(HttpHeaders.COOKIE, "redfox_refresh_token=expired-refresh")
+              .uri("/auth/refresh")
+              .header(
+                  HttpHeaders.COOKIE,
+                  "redfox_refresh_token=expired-refresh; XSRF-TOKEN=$csrfToken",
+              )
+              .header("X-XSRF-TOKEN", csrfToken)
               .exchange()
               .returnResult()
 
@@ -181,8 +217,7 @@ class OAuth2ControllerTests : PostgresAwareTest {
 
     @Test
     fun whenLogout_thenReturns204AndClearsBothCookies() {
-      val response: ExchangeResult =
-          restClient.post().uri("/api/oauth2/logout").exchange().returnResult()
+      val response: ExchangeResult = restClient.post().uri("/auth/logout").exchange().returnResult()
 
       assertThat(response.status).isEqualTo(HttpStatus.NO_CONTENT)
 

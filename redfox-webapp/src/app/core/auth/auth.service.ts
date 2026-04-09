@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { AccessToken } from '../common/common.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly authServerUrl = 'http://localhost:8483';
   private readonly clientId = 'webapp-client';
   private readonly redirectUri = 'http://localhost:8482/oauth2/callback';
+
+  private accessToken?: AccessToken;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -28,27 +31,39 @@ export class AuthService {
     window.location.href = `${this.authServerUrl}/oauth2/authorize?${params.toString()}`;
   }
 
+  getAccessTokenValue(): string | undefined {
+    return this.accessToken?.accessToken;
+  }
+
   exchangeCode(code: string): Observable<void> {
     const codeVerifier = sessionStorage.getItem('pkce_code_verifier') || '';
     sessionStorage.removeItem('pkce_code_verifier');
 
     return this.http
-      .post<void>('/api/oauth2/token', {
+      .post<void>('/auth/token', {
         code,
         redirectUri: this.redirectUri,
         codeVerifier,
       })
-      .pipe(tap(() => sessionStorage.setItem('authenticated', 'true')));
+      .pipe(
+        tap((response: any) => {
+          this.accessToken = response as AccessToken;
+        }),
+      );
   }
 
   refreshToken(): Observable<void> {
-    return this.http.post<void>('/api/oauth2/refresh', {});
+    return this.http.post<void>('/auth/refresh', {}).pipe(
+      tap((response: any) => {
+        this.accessToken = response as AccessToken;
+      }),
+    );
   }
 
   logout(): Observable<void> {
-    return this.http.post<void>('/api/oauth2/logout', {}).pipe(
+    return this.http.post<void>('/auth/logout', {}).pipe(
       tap(() => {
-        sessionStorage.removeItem('authenticated');
+        this.accessToken = undefined;
       }),
     );
   }
@@ -61,7 +76,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return sessionStorage.getItem('authenticated') === 'true';
+    return !!this.accessToken;
   }
 
   whoami(): Observable<any> {

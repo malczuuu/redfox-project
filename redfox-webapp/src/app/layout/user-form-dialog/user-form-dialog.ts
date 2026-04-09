@@ -34,7 +34,7 @@ export class UserFormDialog implements OnInit {
     this.isEdit = !!this.data;
     this.form = this.fb.group({
       login: [{ value: this.data?.login ?? '', disabled: this.isEdit }, Validators.required],
-      passhash: [{ value: '', disabled: this.isEdit }, this.isEdit ? [] : Validators.required],
+      password: [{ value: '', disabled: this.isEdit }, this.isEdit ? [] : Validators.required],
       firstName: [this.data?.firstName ?? '', Validators.required],
       lastName: [this.data?.lastName ?? '', Validators.required],
     });

@@ -10,7 +10,7 @@ export interface User {
 
 export interface CreateUser {
   login: string;
-  passhash: string;
+  password: string;
   firstName: string;
   lastName: string;
 }

@@ -45,8 +45,8 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
 
       sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
       authorizeHttpRequests {
-        authorize("/api/oauth2/**", permitAll)
         authorize("/api/v1/**", authenticated)
+        authorize("/auth/**", permitAll)
         authorize("/actuator/**", permitAll)
         authorize("/swagger-ui/**", permitAll)
         authorize("/v3/api-docs", permitAll)
@@ -61,7 +61,7 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
             PreAuthenticatedAuthenticationToken(user, it.tokenValue, user.authorities)
           }
         }
-        bearerTokenResolver = CookieBearerTokenResolver()
+        // bearerTokenResolver = CookieBearerTokenResolver()
       }
 
       if (authProperties.basic.enabled) {

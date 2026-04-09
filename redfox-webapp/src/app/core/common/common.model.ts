@@ -1,3 +1,8 @@
+export interface AccessToken {
+  accessToken: string;
+  expiresIn: number;
+}
+
 export interface Identity {
   id: string;
 }

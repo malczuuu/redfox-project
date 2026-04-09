@@ -8,17 +8,21 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (req.url.startsWith('/api/oauth2/')) {
+  if (req.url.startsWith('/auth/')) {
     return next(req);
   }
+
+  req = enhanceRequestWithToken(req, authService);
 
   return next(req).pipe(
     catchError((error) => {
       if (error.status === 401) {
         return authService.refreshToken().pipe(
-          switchMap(() => next(req)),
+          switchMap(() => {
+            req = enhanceRequestWithToken(req, authService);
+            return next(req);
+          }),
           catchError(() => {
-            sessionStorage.removeItem('authenticated');
             router.navigate(['/']);
             return throwError(() => error);
           }),
@@ -28,3 +32,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
+
+function enhanceRequestWithToken(req: any, authService: AuthService) {
+  const token = authService.getAccessTokenValue();
+  if (token) {
+    req = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+  return req;
+}
