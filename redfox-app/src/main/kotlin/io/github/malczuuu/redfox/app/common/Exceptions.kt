@@ -12,3 +12,5 @@ open class NotFoundException(detail: String) :
 
 open class ConflictException(detail: String) :
     ProblemException(Problem.of(HttpStatus.CONFLICT.value(), detail))
+
+class XsrfVerificationException() : BadRequestException("xsrf verification failed")

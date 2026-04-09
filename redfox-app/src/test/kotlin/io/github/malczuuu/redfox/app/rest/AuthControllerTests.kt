@@ -25,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.client.ExchangeResult
 import org.springframework.test.web.servlet.client.RestTestClient
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 
 @ActiveProfiles(profiles = ["test"])
 @AutoConfigureRestTestClient
@@ -34,6 +36,7 @@ class AuthControllerTests : PostgresAwareTest {
 
   @Autowired private lateinit var restClient: RestTestClient
   @Autowired private lateinit var userRepository: UserRepository
+  @Autowired private lateinit var jsonMapper: JsonMapper
 
   @MockitoBean private lateinit var oauth2Service: OAuth2Service
 
@@ -46,7 +49,7 @@ class AuthControllerTests : PostgresAwareTest {
   inner class TokenExchangeTests {
 
     @Test
-    fun givenValidCode_whenExchangeToken_thenReturns204AndSetsTokenCookies() {
+    fun givenValidCode_whenExchangeToken_thenReturns200AndSetsTokenCookies() {
       `when`(oauth2Service.exchangeToken("auth-code", "http://localhost/cb", "verifier-xyz"))
           .thenReturn(
               TokenDto(accessToken = "acc-token", refreshToken = "ref-token", expiresIn = 120)
@@ -68,14 +71,16 @@ class AuthControllerTests : PostgresAwareTest {
               .exchange()
               .returnResult()
 
-      assertThat(response.status).isEqualTo(HttpStatus.NO_CONTENT)
+      assertThat(response.status).isEqualTo(HttpStatus.OK)
       val setCookies = response.responseHeaders[HttpHeaders.SET_COOKIE] ?: emptyList<String>()
-      assertThat(setCookies.any { it.startsWith("redfox_access_token=acc-token") }).isTrue()
       assertThat(setCookies.any { it.startsWith("redfox_refresh_token=ref-token") }).isTrue()
+      assertThat(response.responseCookies["redfox_xsrf_token"]).isNotNull.anySatisfy { cookie ->
+        assertThat(cookie.value).isNotEmpty()
+      }
     }
 
     @Test
-    fun givenNoRefreshTokenInResponse_whenExchangeToken_thenReturns204WithOnlyAccessCookie() {
+    fun givenNoRefreshTokenInResponse_whenExchangeToken_thenReturns200WithNoRefreshCookie() {
       `when`(oauth2Service.exchangeToken("auth-code", "http://localhost/cb", "verifier-xyz"))
           .thenReturn(TokenDto(accessToken = "acc-token", refreshToken = null, expiresIn = 120))
 
@@ -95,10 +100,12 @@ class AuthControllerTests : PostgresAwareTest {
               .exchange()
               .returnResult()
 
-      assertThat(response.status).isEqualTo(HttpStatus.NO_CONTENT)
+      assertThat(response.status).isEqualTo(HttpStatus.OK)
       val setCookies = response.responseHeaders[HttpHeaders.SET_COOKIE] ?: emptyList<String>()
-      assertThat(setCookies.any { it.startsWith("redfox_access_token=acc-token") }).isTrue()
       assertThat(setCookies.none { it.startsWith("redfox_refresh_token=") }).isTrue()
+      assertThat(response.responseCookies["redfox_xsrf_token"]).isNotNull.anySatisfy { cookie ->
+        assertThat(cookie.value).isNotEmpty()
+      }
     }
 
     @Test
@@ -130,17 +137,8 @@ class AuthControllerTests : PostgresAwareTest {
   @Nested
   inner class TokenRefreshTests {
 
-    private lateinit var csrfToken: String
-
-    @BeforeEach
-    fun fetchCsrfToken() {
-      val result = restClient.get().uri("/actuator/health").exchange().returnResult()
-      csrfToken =
-          result.responseCookies["XSRF-TOKEN"]?.first()?.value ?: error("XSRF-TOKEN cookie not set")
-    }
-
     @Test
-    fun givenValidRefreshCookie_whenRefreshToken_thenReturns204AndSetsNewCookies() {
+    fun givenValidRefreshCookie_whenRefreshToken_thenReturns200AndSetsNewCookies() {
       `when`(oauth2Service.refreshToken("valid-refresh"))
           .thenReturn(TokenDto(accessToken = "new-acc", refreshToken = "new-ref", expiresIn = 120))
 
@@ -150,16 +148,18 @@ class AuthControllerTests : PostgresAwareTest {
               .uri("/auth/refresh")
               .header(
                   HttpHeaders.COOKIE,
-                  "redfox_refresh_token=valid-refresh; XSRF-TOKEN=$csrfToken",
+                  "redfox_refresh_token=valid-refresh; redfox_xsrf_token=test-xsrf-token-value",
               )
-              .header("X-XSRF-TOKEN", csrfToken)
+              .header("X-Xsrf-Token", "test-xsrf-token-value")
               .exchange()
               .returnResult()
 
-      assertThat(response.status).isEqualTo(HttpStatus.NO_CONTENT)
+      assertThat(response.status).isEqualTo(HttpStatus.OK)
       val setCookies = response.responseHeaders[HttpHeaders.SET_COOKIE] ?: emptyList<String>()
-      assertThat(setCookies.any { it.startsWith("redfox_access_token=new-acc") }).isTrue()
       assertThat(setCookies.any { it.startsWith("redfox_refresh_token=new-ref") }).isTrue()
+      assertThat(response.responseCookies["redfox_xsrf_token"]).isNotNull.anySatisfy { cookie ->
+        assertThat(cookie.value).isNotEmpty()
+      }
     }
 
     @Test
@@ -168,8 +168,8 @@ class AuthControllerTests : PostgresAwareTest {
           restClient
               .post()
               .uri("/auth/refresh")
-              .header(HttpHeaders.COOKIE, "XSRF-TOKEN=$csrfToken")
-              .header("X-XSRF-TOKEN", csrfToken)
+              .header(HttpHeaders.COOKIE, "redfox_xsrf_token=test-xsrf-token-value")
+              .header("X-Xsrf-Token", "test-xsrf-token-value")
               .exchange()
               .returnResult()
 
@@ -178,7 +178,7 @@ class AuthControllerTests : PostgresAwareTest {
     }
 
     @Test
-    fun givenMissingCsrfToken_whenRefreshToken_thenReturns403() {
+    fun givenMissingXsrfToken_whenRefreshToken_thenReturns400WithDetail() {
       val response: ExchangeResult =
           restClient
               .post()
@@ -187,7 +187,42 @@ class AuthControllerTests : PostgresAwareTest {
               .exchange()
               .returnResult()
 
-      assertThat(response.status).isEqualTo(HttpStatus.FORBIDDEN)
+      assertThat(response.status).isEqualTo(HttpStatus.BAD_REQUEST)
+      assertThat(response.responseHeaders.contentType).isEqualTo(APPLICATION_PROBLEM_JSON)
+      val problem = jsonMapper.readValue<Problem>(response.responseBodyContent)
+      assertThat(problem)
+          .isEqualTo(
+              Problem.builder()
+                  .status(HttpStatus.BAD_REQUEST.value())
+                  .detail("xsrf verification failed")
+                  .build()
+          )
+    }
+
+    @Test
+    fun givenMismatchedXsrfTokens_whenRefreshToken_thenReturns400WithDetail() {
+      val response: ExchangeResult =
+          restClient
+              .post()
+              .uri("/auth/refresh")
+              .header(
+                  HttpHeaders.COOKIE,
+                  "redfox_refresh_token=valid-refresh; redfox_xsrf_token=correct-token",
+              )
+              .header("X-Xsrf-Token", "wrong-token")
+              .exchange()
+              .returnResult()
+
+      assertThat(response.status).isEqualTo(HttpStatus.BAD_REQUEST)
+      assertThat(response.responseHeaders.contentType).isEqualTo(APPLICATION_PROBLEM_JSON)
+      val problem = jsonMapper.readValue<Problem>(response.responseBodyContent)
+      assertThat(problem)
+          .isEqualTo(
+              Problem.builder()
+                  .status(HttpStatus.BAD_REQUEST.value())
+                  .detail("xsrf verification failed")
+                  .build()
+          )
     }
 
     @Test
@@ -201,9 +236,9 @@ class AuthControllerTests : PostgresAwareTest {
               .uri("/auth/refresh")
               .header(
                   HttpHeaders.COOKIE,
-                  "redfox_refresh_token=expired-refresh; XSRF-TOKEN=$csrfToken",
+                  "redfox_refresh_token=expired-refresh; redfox_xsrf_token=test-xsrf-token-value",
               )
-              .header("X-XSRF-TOKEN", csrfToken)
+              .header("X-Xsrf-Token", "test-xsrf-token-value")
               .exchange()
               .returnResult()
 
@@ -223,14 +258,14 @@ class AuthControllerTests : PostgresAwareTest {
 
       val cookies = response.responseCookies
 
-      assertThat(cookies["redfox_access_token"]).isNotNull.anySatisfy {
-        assertThat(it.value).isEmpty()
-        assertThat(it.maxAge).isZero
-      }
-
       assertThat(cookies["redfox_refresh_token"]).isNotNull.anySatisfy {
         assertThat(it.value).isEmpty()
-        assertThat(it.maxAge).isZero
+        assertThat(it.maxAge).isZero()
+      }
+
+      assertThat(cookies["redfox_xsrf_token"]).isNotNull.anySatisfy {
+        assertThat(it.value).isEmpty()
+        assertThat(it.maxAge).isZero()
       }
     }
   }
