@@ -3,8 +3,8 @@ package io.github.malczuuu.redfox.app.security
 import java.time.Duration
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "redfox.auth")
-data class AuthProperties(
+@ConfigurationProperties(prefix = "redfox.security")
+data class SecurityProperties(
     val authserverTokenUri: String,
     val clientId: String,
     val clientSecret: String,

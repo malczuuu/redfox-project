@@ -12,7 +12,7 @@ import tools.jackson.databind.json.JsonMapper
 
 @Service
 class OAuth2Service(
-    private val authProperties: AuthProperties,
+    private val properties: SecurityProperties,
     private val authServerRestClient: RestClient,
     private val jsonMapper: JsonMapper,
 ) {
@@ -38,8 +38,8 @@ class OAuth2Service(
       val body =
           authServerRestClient
               .post()
-              .uri(authProperties.authserverTokenUri)
-              .headers { it.setBasicAuth(authProperties.clientId, authProperties.clientSecret) }
+              .uri(properties.authserverTokenUri)
+              .headers { it.setBasicAuth(properties.clientId, properties.clientSecret) }
               .contentType(MediaType.APPLICATION_FORM_URLENCODED)
               .body(formData)
               .retrieve()

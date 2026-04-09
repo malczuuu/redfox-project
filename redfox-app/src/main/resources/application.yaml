@@ -29,7 +29,7 @@ spring:
           issuer-uri: http://localhost:8483
 
 redfox:
-  auth:
+  security:
     authserver-token-uri: http://localhost:8483/oauth2/token
     client-id: webapp-client
     client-secret: webapp-secret

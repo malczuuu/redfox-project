@@ -1,8 +1,8 @@
 package io.github.malczuuu.redfox.app.rest
 
 import io.github.malczuuu.redfox.app.common.XsrfVerificationException
-import io.github.malczuuu.redfox.app.security.AuthProperties
 import io.github.malczuuu.redfox.app.security.OAuth2Service
+import io.github.malczuuu.redfox.app.security.SecurityProperties
 import io.github.malczuuu.redfox.app.security.TokenDto
 import io.github.malczuuu.redfox.app.security.TokenExchangeDto
 import io.github.problem4j.core.Problem
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/auth")
 class AuthController(
     private val oauth2Service: OAuth2Service,
-    private val authProperties: AuthProperties,
+    private val properties: SecurityProperties,
 ) {
 
   companion object {
@@ -80,9 +80,9 @@ class AuthController(
     if (token.refreshToken != null) {
       val refreshCookie = Cookie(REFRESH_TOKEN_COOKIE, token.refreshToken)
       refreshCookie.isHttpOnly = true
-      refreshCookie.secure = authProperties.cookieSecure
+      refreshCookie.secure = properties.cookieSecure
       refreshCookie.path = "/auth/refresh"
-      refreshCookie.maxAge = authProperties.refreshCookieMaxAge.toSeconds().toInt()
+      refreshCookie.maxAge = properties.refreshCookieMaxAge.toSeconds().toInt()
       refreshCookie.setAttribute("SameSite", "Lax")
       response.addCookie(refreshCookie)
     }
@@ -91,7 +91,7 @@ class AuthController(
   private fun clearRefreshTokenCookie(response: HttpServletResponse) {
     val cookie = Cookie(REFRESH_TOKEN_COOKIE, "")
     cookie.isHttpOnly = true
-    cookie.secure = authProperties.cookieSecure
+    cookie.secure = properties.cookieSecure
     cookie.path = "/auth/refresh"
     cookie.maxAge = 0
     cookie.setAttribute("SameSite", "Lax")
@@ -102,8 +102,8 @@ class AuthController(
     val cookie = Cookie(XSRF_TOKEN_COOKIE, UUID.randomUUID().toString())
     cookie.isHttpOnly = false
     cookie.path = "/"
-    cookie.secure = authProperties.cookieSecure
-    cookie.maxAge = authProperties.refreshCookieMaxAge.toSeconds().toInt()
+    cookie.secure = properties.cookieSecure
+    cookie.maxAge = properties.refreshCookieMaxAge.toSeconds().toInt()
     cookie.setAttribute("SameSite", "Lax")
     response.addCookie(cookie)
   }
@@ -112,7 +112,7 @@ class AuthController(
     val cookie = Cookie(XSRF_TOKEN_COOKIE, "")
     cookie.isHttpOnly = false
     cookie.path = "/"
-    cookie.secure = authProperties.cookieSecure
+    cookie.secure = properties.cookieSecure
     cookie.maxAge = 0
     cookie.setAttribute("SameSite", "Lax")
     response.addCookie(cookie)

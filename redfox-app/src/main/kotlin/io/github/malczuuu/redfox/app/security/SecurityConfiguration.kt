@@ -18,17 +18,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(AuthProperties::class)
+@EnableConfigurationProperties(SecurityProperties::class)
 class SecurityConfiguration(jsonMapper: JsonMapper) {
 
   private val problemString401 =
@@ -37,12 +35,11 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
   @Bean
   fun securityFilterChain(
       http: HttpSecurity,
-      authProperties: AuthProperties,
-      userDetailsService: UserDetailsService,
+      properties: SecurityProperties,
+      jwtPrincipalConverter: JwtPrincipalConverter,
   ): SecurityFilterChain {
     http {
       csrf { disable() }
-
       sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
       authorizeHttpRequests {
         authorize("/api/v1/**", authenticated)
@@ -53,21 +50,10 @@ class SecurityConfiguration(jsonMapper: JsonMapper) {
         authorize("/v3/api-docs/swagger-config", permitAll)
         authorize("/**", denyAll)
       }
-      oauth2ResourceServer {
-        jwt {
-          jwtAuthenticationConverter = {
-            val login = it.subject
-            val user = userDetailsService.loadUserByUsername(login)
-            PreAuthenticatedAuthenticationToken(user, it.tokenValue, user.authorities)
-          }
-        }
-        // bearerTokenResolver = CookieBearerTokenResolver()
-      }
-
-      if (authProperties.basic.enabled) {
+      oauth2ResourceServer { jwt { jwtAuthenticationConverter = jwtPrincipalConverter } }
+      if (properties.basic.enabled) {
         httpBasic {}
       }
-
       exceptionHandling {
         authenticationEntryPoint = { _, response, _ -> write401(response) }
         accessDeniedHandler = { _, response, _ -> write401(response) }

@@ -13,7 +13,7 @@ spring:
           issuer-uri: http://localhost
 
 redfox:
-  auth:
+  security:
     authserver-token-uri: http://localhost/oauth2/token
     client-id: webapp-client
     cookie-domain: localhost
