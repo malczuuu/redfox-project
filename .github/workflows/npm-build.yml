@@ -1,5 +1,4 @@
 name: NPM Build
-
 on:
   push:
     branches:
@@ -18,6 +17,8 @@ jobs:
   build:
     name: Build (Node.js 24)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: redfox-webapp

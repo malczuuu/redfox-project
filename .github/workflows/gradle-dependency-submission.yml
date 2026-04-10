@@ -1,16 +1,16 @@
-name: Dependency Submission
+name: Gradle Dependency Submission
 on:
   push:
     branches:
-      - main
+      - "main"
     paths:
-      - '**/*.gradle.kts'
-      - gradle.properties
-      - gradle/**
-      - buildSrc/**
-      - gradlew
-      - gradlew.bat
-      - .github/workflows/gradle-dependency-submission.yml
+      - ".github/workflows/gradle-dependency-submission.yml"
+      - "**/*.gradle.kts"
+      - "gradle.properties"
+      - "gradle/**"
+      - "buildSrc/**"
+      - "gradlew"
+      - "gradlew.bat"
 
 jobs:
   dependency-submission:
@@ -49,6 +49,6 @@ jobs:
             -Dorg.gradle.parallel=false
             -Dorg.gradle.workers.max=1
         with:
-          cache-disabled: true
+          cache-disabled: "true"
           dependency-graph-exclude-projects: ":buildSrc"
           dependency-graph-exclude-configurations: ".*[Tt]est(Compile|Runtime)Classpath"
