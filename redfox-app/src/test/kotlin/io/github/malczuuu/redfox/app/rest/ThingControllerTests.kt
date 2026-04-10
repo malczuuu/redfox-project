@@ -964,6 +964,31 @@ class ThingControllerTests : PostgresAwareTest {
                   .build()
           )
     }
+
+    @Test
+    fun givenUnknownThingId_whenUpdateThing_thenReturns404() {
+      val requestBody =
+          mapOf("name" to "Updated Name", "description" to "Updated Desc", "version" to 0L)
+      val response =
+          restClient
+              .put()
+              .uri("/api/v1/projects/${project.id}/things/${UUID.randomUUID()}")
+              .contentType(APPLICATION_JSON)
+              .body(requestBody)
+              .exchange()
+              .returnResult()
+
+      assertThat(response.status).isEqualTo(HttpStatus.NOT_FOUND)
+      assertThat(response.responseHeaders.contentType).isEqualTo(APPLICATION_PROBLEM_JSON)
+      val problem = jsonMapper.readValue<Problem>(response.responseBodyContent)
+      assertThat(problem)
+          .isEqualTo(
+              Problem.builder()
+                  .status(HttpStatus.NOT_FOUND.value())
+                  .detail("thing not found")
+                  .build()
+          )
+    }
   }
 
   @Nested

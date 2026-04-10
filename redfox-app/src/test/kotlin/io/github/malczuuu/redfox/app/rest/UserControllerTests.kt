@@ -987,6 +987,30 @@ class UserControllerTests : PostgresAwareTest {
                   .build()
           )
     }
+
+    @Test
+    fun givenUnknownId_whenUpdateUser_thenReturns404() {
+      val requestBody = mapOf("firstName" to "Jane", "lastName" to "Doe", "version" to 0L)
+      val response =
+          restClient
+              .put()
+              .uri("/api/v1/users/${UUID.randomUUID()}")
+              .contentType(APPLICATION_JSON)
+              .body(requestBody)
+              .exchange()
+              .returnResult()
+
+      assertThat(response.status).isEqualTo(HttpStatus.NOT_FOUND)
+      assertThat(response.responseHeaders.contentType).isEqualTo(APPLICATION_PROBLEM_JSON)
+      val problem = jsonMapper.readValue<Problem>(response.responseBodyContent)
+      assertThat(problem)
+          .isEqualTo(
+              Problem.builder()
+                  .status(HttpStatus.NOT_FOUND.value())
+                  .detail("user not found")
+                  .build()
+          )
+    }
   }
 
   @Nested
