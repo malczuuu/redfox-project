@@ -1,0 +1,46 @@
+name: NPM Build
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/npm-build.yml"
+      - "redfox-webapp/**"
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/npm-build.yml"
+      - "redfox-webapp/**"
+
+jobs:
+  build:
+    name: Build (Node.js ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [ 20.x, 22.x, 24.x ]
+    defaults:
+      run:
+        working-directory: redfox-webapp
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "redfox-webapp/package-lock.json"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check Prettier
+        run: npm run prettier:check
+
+      - name: Build Project
+        run: npm run build --if-present
