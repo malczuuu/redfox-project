@@ -17,8 +17,10 @@
 
 ## Authentication Flow
 
-The webapp uses the OAuth2 Authorization Code flow with PKCE. The browser never sees the `client_secret` - all token 
-requests are proxied through `redfox-app`.
+The webapp uses the OAuth2 Authorization Code flow with PKCE. The browser never sees the `client_secret` - all token
+requests are proxied through `redfox-app`. A **hybrid token storage** strategy is used: the access token is returned in
+the response body and kept in-memory by the SPA (`AuthService`), while the refresh token is stored in an HttpOnly cookie
+scoped to `/auth/refresh`.
 
 ```mermaid
 sequenceDiagram
@@ -38,14 +40,16 @@ sequenceDiagram
     webapp->>app: POST /auth/token<br/>{ code, redirectUri, codeVerifier }
     app->>auth: POST /oauth2/token<br/>grant_type=authorization_code<br/>code=… code_verifier=…<br/>client_id=webapp-client client_secret=***
     auth-->>app: { access_token (JWT), refresh_token, expires_in }
-    app-->>Browser: Set HttpOnly cookies:<br/>redfox_access_token (max-age = expires_in)<br/>redfox_refresh_token (max-age = 8h)<br/>204 No Content
+    app-->>webapp: 200 OK { accessToken, expiresIn }<br/>Set-Cookie: redfox_refresh_token (HttpOnly, path=/auth/refresh)<br/>Set-Cookie: redfox_xsrf_token (non-HttpOnly, path=/)
+    Note over webapp: Stores accessToken in-memory (AuthService)
     webapp->>Browser: Navigate to /projects
 ```
 
 ## Token Refresh Flow
 
-Access tokens expire after 2 minutes. The Angular `authInterceptor` transparently refreshes them on a 401 response and
-retries the failed request. The refresh token is rotated on every use (`reuse-refresh-tokens: false`).
+Access tokens expire after 2 minutes and are held only in-memory. The Angular `authInterceptor` attaches them as
+`Authorization: Bearer` headers and transparently refreshes them on a 401 response, retrying the failed request. The
+refresh token is rotated on every use (`reuse-refresh-tokens: false`).
 
 ```mermaid
 sequenceDiagram
@@ -56,19 +60,21 @@ sequenceDiagram
     participant auth as redfox-authserver<br/>(:8483)
 
     User->>webapp: Navigate to /projects
-    webapp->>app: GET /api/v1/projects<br/>(cookie: redfox_access_token - expired)
+    webapp->>app: GET /api/v1/projects<br/>(Authorization: Bearer <expired access token>)
     app-->>webapp: 401 Unauthorized
-    webapp->>app: POST /auth/refresh<br/>(cookie: redfox_refresh_token)
+    webapp->>app: POST /auth/refresh<br/>(cookie: redfox_refresh_token)<br/>(header: X-Xsrf-Token = redfox_xsrf_token cookie value)
+    Note over app: Verifies X-Xsrf-Token header == redfox_xsrf_token cookie
     app->>auth: POST /oauth2/token<br/>grant_type=refresh_token<br/>refresh_token=… client_id=… client_secret=***
     auth-->>app: { access_token (new JWT), refresh_token (new), expires_in }
-    app-->>Browser: Set updated HttpOnly cookies<br/>204 No Content
+    app-->>webapp: 200 OK { accessToken, expiresIn }<br/>Rotate redfox_refresh_token (HttpOnly)<br/>Rotate redfox_xsrf_token (new UUID)
+    Note over webapp: Updates in-memory accessToken
 
     alt Refresh succeeded
-        webapp->>app: GET /api/v1/projects (retry)<br/>(cookie: redfox_access_token - new)
+        webapp->>app: GET /api/v1/projects (retry)<br/>(Authorization: Bearer <new access token>)
         app-->>webapp: 200 OK
         webapp-->>User: Projects list
     else Refresh failed
-        webapp->>Browser: Clear session, redirect to /
+        webapp->>Browser: Clear in-memory token, redirect to /
     end
 ```
 
