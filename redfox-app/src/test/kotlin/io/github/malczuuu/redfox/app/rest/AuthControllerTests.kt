@@ -1,18 +1,20 @@
 package io.github.malczuuu.redfox.app.rest
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.unauthorized
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.github.malczuuu.checkmate.annotation.ContainerTest
 import io.github.malczuuu.checkmate.container.PostgresAwareTest
 import io.github.malczuuu.redfox.app.Application
 import io.github.malczuuu.redfox.app.domain.UserRepository
-import io.github.malczuuu.redfox.app.security.OAuth2Service
-import io.github.malczuuu.redfox.app.security.TokenDto
 import io.github.problem4j.core.Problem
-import io.github.problem4j.core.ProblemException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,15 +24,18 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.client.ExchangeResult
 import org.springframework.test.web.servlet.client.RestTestClient
+import org.wiremock.spring.ConfigureWireMock
+import org.wiremock.spring.EnableWireMock
+import org.wiremock.spring.InjectWireMock
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 
 @ActiveProfiles(profiles = ["test"])
 @AutoConfigureRestTestClient
 @ContainerTest
+@EnableWireMock(ConfigureWireMock(name = "authserver", baseUrlProperties = ["authserver.url"]))
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
 class AuthControllerTests : PostgresAwareTest {
 
@@ -38,11 +43,12 @@ class AuthControllerTests : PostgresAwareTest {
   @Autowired private lateinit var userRepository: UserRepository
   @Autowired private lateinit var jsonMapper: JsonMapper
 
-  @MockitoBean private lateinit var oauth2Service: OAuth2Service
+  @InjectWireMock("authserver") private lateinit var authServer: WireMockServer
 
   @BeforeEach
   fun beforeEach() {
     userRepository.deleteAll()
+    authServer.resetAll()
   }
 
   @Nested
@@ -50,82 +56,117 @@ class AuthControllerTests : PostgresAwareTest {
 
     @Test
     fun givenValidCode_whenExchangeToken_thenReturns200AndSetsTokenCookies() {
-      `when`(oauth2Service.exchangeToken("auth-code", "http://localhost/cb", "verifier-xyz"))
-          .thenReturn(
-              TokenDto(accessToken = "acc-token", refreshToken = "ref-token", expiresIn = 120)
-          )
+      authServer.stubFor(
+          post(urlEqualTo("/oauth2/token"))
+              .withRequestBody(containing("grant_type=authorization_code"))
+              .withRequestBody(containing("code=auth-code"))
+              .willReturn(
+                  okJson(
+                      """{"access_token":"acc-token","refresh_token":"ref-token","expires_in":120}"""
+                  )
+              )
+      )
 
-      val requestBody =
-          mapOf(
-              "code" to "auth-code",
-              "redirectUri" to "http://localhost/cb",
-              "codeVerifier" to "verifier-xyz",
-          )
-
-      val response: ExchangeResult =
+      val response =
           restClient
               .post()
               .uri("/auth/token")
               .contentType(APPLICATION_JSON)
-              .body(requestBody)
+              .body(
+                  mapOf(
+                      "code" to "auth-code",
+                      "redirectUri" to "http://localhost/cb",
+                      "codeVerifier" to "verifier-xyz",
+                  )
+              )
               .exchange()
               .returnResult()
 
       assertThat(response.status).isEqualTo(HttpStatus.OK)
-      val setCookies = response.responseHeaders[HttpHeaders.SET_COOKIE] ?: emptyList<String>()
-      assertThat(setCookies.any { it.startsWith("redfox_refresh_token=ref-token") }).isTrue()
+      assertThat(response.responseHeaders[HttpHeaders.SET_COOKIE]).anySatisfy {
+        assertThat(it).startsWith("redfox_refresh_token=ref-token")
+      }
       assertThat(response.responseCookies["redfox_xsrf_token"]).isNotNull.anySatisfy { cookie ->
         assertThat(cookie.value).isNotEmpty()
       }
     }
 
     @Test
-    fun givenNoRefreshTokenInResponse_whenExchangeToken_thenReturns200WithNoRefreshCookie() {
-      `when`(oauth2Service.exchangeToken("auth-code", "http://localhost/cb", "verifier-xyz"))
-          .thenReturn(TokenDto(accessToken = "acc-token", refreshToken = null, expiresIn = 120))
+    fun givenValidCode_whenExchangeToken_thenReturns200WithAccessTokenInBody() {
+      authServer.stubFor(
+          post(urlEqualTo("/oauth2/token"))
+              .willReturn(
+                  okJson(
+                      """{"access_token":"acc-token","refresh_token":"ref-token","expires_in":120}"""
+                  )
+              )
+      )
 
-      val requestBody =
-          mapOf(
-              "code" to "auth-code",
-              "redirectUri" to "http://localhost/cb",
-              "codeVerifier" to "verifier-xyz",
-          )
-
-      val response: ExchangeResult =
+      val response =
           restClient
               .post()
               .uri("/auth/token")
               .contentType(APPLICATION_JSON)
-              .body(requestBody)
+              .body(
+                  mapOf(
+                      "code" to "auth-code",
+                      "redirectUri" to "http://localhost/cb",
+                      "codeVerifier" to "verifier-xyz",
+                  )
+              )
               .exchange()
               .returnResult()
 
       assertThat(response.status).isEqualTo(HttpStatus.OK)
-      val setCookies = response.responseHeaders[HttpHeaders.SET_COOKIE] ?: emptyList<String>()
+      val body = jsonMapper.readValue<Map<String, *>>(response.responseBodyContent)
+      assertThat(body["accessToken"]).isEqualTo("acc-token")
+      assertThat(body["expiresIn"]).isEqualTo(120)
+      assertThat(body).doesNotContainKey("refreshToken")
+    }
+
+    @Test
+    fun givenNoRefreshTokenInResponse_whenExchangeToken_thenNoRefreshCookieSet() {
+      authServer.stubFor(
+          post(urlEqualTo("/oauth2/token"))
+              .willReturn(okJson("""{"access_token":"acc-token","expires_in":120}"""))
+      )
+
+      val response =
+          restClient
+              .post()
+              .uri("/auth/token")
+              .contentType(APPLICATION_JSON)
+              .body(
+                  mapOf(
+                      "code" to "auth-code",
+                      "redirectUri" to "http://localhost/cb",
+                      "codeVerifier" to "verifier-xyz",
+                  )
+              )
+              .exchange()
+              .returnResult()
+
+      assertThat(response.status).isEqualTo(HttpStatus.OK)
+      val setCookies = response.responseHeaders[HttpHeaders.SET_COOKIE] ?: emptyList()
       assertThat(setCookies.none { it.startsWith("redfox_refresh_token=") }).isTrue()
-      assertThat(response.responseCookies["redfox_xsrf_token"]).isNotNull.anySatisfy { cookie ->
-        assertThat(cookie.value).isNotEmpty()
-      }
     }
 
     @Test
     fun givenAuthServerError_whenExchangeToken_thenReturns401() {
-      `when`(oauth2Service.exchangeToken("bad-code", "http://localhost/cb", "verifier-xyz"))
-          .thenThrow(ProblemException(Problem.of(HttpStatus.UNAUTHORIZED.value())))
-
-      val requestBody =
-          mapOf(
-              "code" to "bad-code",
-              "redirectUri" to "http://localhost/cb",
-              "codeVerifier" to "verifier-xyz",
-          )
+      authServer.stubFor(post(urlEqualTo("/oauth2/token")).willReturn(unauthorized()))
 
       val response: ExchangeResult =
           restClient
               .post()
               .uri("/auth/token")
               .contentType(APPLICATION_JSON)
-              .body(requestBody)
+              .body(
+                  mapOf(
+                      "code" to "bad-code",
+                      "redirectUri" to "http://localhost/cb",
+                      "codeVerifier" to "verifier-xyz",
+                  )
+              )
               .exchange()
               .returnResult()
 
@@ -138,9 +179,17 @@ class AuthControllerTests : PostgresAwareTest {
   inner class TokenRefreshTests {
 
     @Test
-    fun givenValidRefreshCookie_whenRefreshToken_thenReturns200AndSetsNewCookies() {
-      `when`(oauth2Service.refreshToken("valid-refresh"))
-          .thenReturn(TokenDto(accessToken = "new-acc", refreshToken = "new-ref", expiresIn = 120))
+    fun givenValidRefreshCookie_whenRefreshToken_thenReturns200AndRotatesCookies() {
+      authServer.stubFor(
+          post(urlEqualTo("/oauth2/token"))
+              .withRequestBody(containing("grant_type=refresh_token"))
+              .withRequestBody(containing("refresh_token=valid-refresh"))
+              .willReturn(
+                  okJson(
+                      """{"access_token":"new-acc","refresh_token":"new-ref","expires_in":120}"""
+                  )
+              )
+      )
 
       val response: ExchangeResult =
           restClient
@@ -148,15 +197,16 @@ class AuthControllerTests : PostgresAwareTest {
               .uri("/auth/refresh")
               .header(
                   HttpHeaders.COOKIE,
-                  "redfox_refresh_token=valid-refresh; redfox_xsrf_token=test-xsrf-token-value",
+                  "redfox_refresh_token=valid-refresh; redfox_xsrf_token=test-xsrf-value",
               )
-              .header("X-Xsrf-Token", "test-xsrf-token-value")
+              .header("X-Xsrf-Token", "test-xsrf-value")
               .exchange()
               .returnResult()
 
       assertThat(response.status).isEqualTo(HttpStatus.OK)
-      val setCookies = response.responseHeaders[HttpHeaders.SET_COOKIE] ?: emptyList<String>()
-      assertThat(setCookies.any { it.startsWith("redfox_refresh_token=new-ref") }).isTrue()
+      assertThat(response.responseHeaders[HttpHeaders.SET_COOKIE]).anySatisfy {
+        assertThat(it).startsWith("redfox_refresh_token=new-ref")
+      }
       assertThat(response.responseCookies["redfox_xsrf_token"]).isNotNull.anySatisfy { cookie ->
         assertThat(cookie.value).isNotEmpty()
       }
@@ -168,8 +218,8 @@ class AuthControllerTests : PostgresAwareTest {
           restClient
               .post()
               .uri("/auth/refresh")
-              .header(HttpHeaders.COOKIE, "redfox_xsrf_token=test-xsrf-token-value")
-              .header("X-Xsrf-Token", "test-xsrf-token-value")
+              .header(HttpHeaders.COOKIE, "redfox_xsrf_token=test-xsrf-value")
+              .header("X-Xsrf-Token", "test-xsrf-value")
               .exchange()
               .returnResult()
 
@@ -227,8 +277,7 @@ class AuthControllerTests : PostgresAwareTest {
 
     @Test
     fun givenAuthServerError_whenRefreshToken_thenReturns401() {
-      `when`(oauth2Service.refreshToken("expired-refresh"))
-          .thenThrow(ProblemException(Problem.of(HttpStatus.UNAUTHORIZED.value())))
+      authServer.stubFor(post(urlEqualTo("/oauth2/token")).willReturn(unauthorized()))
 
       val response: ExchangeResult =
           restClient
@@ -236,9 +285,9 @@ class AuthControllerTests : PostgresAwareTest {
               .uri("/auth/refresh")
               .header(
                   HttpHeaders.COOKIE,
-                  "redfox_refresh_token=expired-refresh; redfox_xsrf_token=test-xsrf-token-value",
+                  "redfox_refresh_token=expired-refresh; redfox_xsrf_token=test-xsrf-value",
               )
-              .header("X-Xsrf-Token", "test-xsrf-token-value")
+              .header("X-Xsrf-Token", "test-xsrf-value")
               .exchange()
               .returnResult()
 

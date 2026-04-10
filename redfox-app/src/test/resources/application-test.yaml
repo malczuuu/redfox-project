@@ -11,7 +11,7 @@ spring:
 
 redfox:
   security:
-    authserver-token-uri: http://localhost/oauth2/token
+    authserver-token-uri: ${authserver.url}/oauth2/token
     client-id: webapp-client
     cookie-domain: localhost
     cookie-secure: false

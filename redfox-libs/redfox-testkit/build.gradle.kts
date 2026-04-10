@@ -20,6 +20,8 @@ dependencies {
     api(libs.spring.boot.resttestclient)
     api(libs.spring.boot.testcontainers)
 
+    api(libs.wiremock.spring.boot)
+
     api(libs.flyway.database.postgresql)
     api(libs.testcontainers.junit.jupiter)
     api(libs.testcontainers.postgresql)
