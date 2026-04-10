@@ -18,6 +18,7 @@ class DiagnosticInspector(private val meterRegistry: MeterRegistry) : AdviceWebM
   companion object {
     private val log = LoggerFactory.getLogger(DiagnosticInspector::class.java)
 
+    private const val UNKNOWN = "unknown"
     private const val REST_ERRORS_METRIC = "redfox.app.rest.errors"
   }
 
@@ -29,7 +30,7 @@ class DiagnosticInspector(private val meterRegistry: MeterRegistry) : AdviceWebM
       status: HttpStatusCode,
       request: WebRequest,
   ) {
-    val info = RequestInfo.from(request, problem, ex)
+    val info = requestInfoFrom(request, problem, ex)
 
     val tags =
         listOf(
@@ -51,24 +52,15 @@ class DiagnosticInspector(private val meterRegistry: MeterRegistry) : AdviceWebM
     builder.log("Handled exception in HTTP controller")
   }
 
-  private data class RequestInfo(val path: String, val method: String, val error: String) {
-    companion object {
-      private const val UNKNOWN = "unknown"
+  private fun requestInfoFrom(request: WebRequest, problem: Problem, ex: Exception): RequestInfo {
+    val type = if (problem.isTypeNonBlank) problem.type.toString() else ex.javaClass.simpleName
 
-      fun from(request: WebRequest, problem: Problem, ex: Exception): RequestInfo {
-        val type =
-            if (problem.isTypeNonBlank) {
-              problem.type.toString()
-            } else {
-              ex.javaClass.simpleName
-            }
-
-        return if (request is ServletWebRequest) {
-          RequestInfo(request.request.requestURI, request.request.method, type)
-        } else {
-          RequestInfo(UNKNOWN, UNKNOWN, type)
-        }
-      }
+    return if (request is ServletWebRequest) {
+      RequestInfo(request.request.requestURI, request.request.method, type)
+    } else {
+      RequestInfo(UNKNOWN, UNKNOWN, type)
     }
   }
+
+  private data class RequestInfo(val path: String, val method: String, val error: String)
 }

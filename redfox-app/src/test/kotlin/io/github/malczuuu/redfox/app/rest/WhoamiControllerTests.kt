@@ -5,6 +5,8 @@ import io.github.malczuuu.checkmate.container.PostgresAwareTest
 import io.github.malczuuu.redfox.app.Application
 import io.github.malczuuu.redfox.app.domain.UserEntity
 import io.github.malczuuu.redfox.app.domain.UserRepository
+import io.github.malczuuu.redfox.testkit.JwtTestHelper
+import io.github.malczuuu.redfox.testkit.MockJwtTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,6 +25,7 @@ import tools.jackson.module.kotlin.readValue
 @ActiveProfiles(profiles = ["test"])
 @AutoConfigureRestTestClient
 @ContainerTest
+@MockJwtTest
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
 class WhoamiControllerTests : PostgresAwareTest {
 
@@ -50,7 +53,7 @@ class WhoamiControllerTests : PostgresAwareTest {
         restClient
             .mutate()
             .requestInterceptor { request, bytes, execution ->
-              request.headers.setBasicAuth("admin", "admin")
+              request.headers.setBearerAuth(JwtTestHelper.generateToken("admin"))
               execution.execute(request, bytes)
             }
             .build()

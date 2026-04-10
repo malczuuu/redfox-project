@@ -16,6 +16,7 @@ dependencies {
     api(libs.spring.boot.starter.validation.test)
     api(libs.spring.boot.starter.webmvc.test)
 
+    api(libs.spring.boot.starter.oauth2.resource.server)
     api(libs.spring.boot.resttestclient)
     api(libs.spring.boot.testcontainers)
 

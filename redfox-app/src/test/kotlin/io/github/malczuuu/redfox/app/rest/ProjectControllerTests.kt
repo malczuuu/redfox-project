@@ -12,6 +12,8 @@ import io.github.malczuuu.redfox.app.domain.ThingEntity
 import io.github.malczuuu.redfox.app.domain.ThingRepository
 import io.github.malczuuu.redfox.app.domain.UserEntity
 import io.github.malczuuu.redfox.app.domain.UserRepository
+import io.github.malczuuu.redfox.testkit.JwtTestHelper
+import io.github.malczuuu.redfox.testkit.MockJwtTest
 import io.github.problem4j.core.Problem
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -37,6 +39,7 @@ import tools.jackson.module.kotlin.readValue
 @ActiveProfiles(profiles = ["test"])
 @AutoConfigureRestTestClient
 @ContainerTest
+@MockJwtTest
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
 class ProjectControllerTests : PostgresAwareTest {
 
@@ -74,7 +77,7 @@ class ProjectControllerTests : PostgresAwareTest {
         restClient
             .mutate()
             .requestInterceptor { request, bytes, execution ->
-              request.headers.setBasicAuth("admin", "admin")
+              request.headers.setBearerAuth(JwtTestHelper.generateToken("admin"))
               execution.execute(request, bytes)
             }
             .build()
