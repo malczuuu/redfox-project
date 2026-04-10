@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-@ConditionalOnBooleanProperty("redfox.token-cleanup.enabled")
+@ConditionalOnBooleanProperty("authserver.token-cleanup.enabled")
 class TokenCleanupScheduler(
     private val jdbcTemplate: JdbcTemplate,
     private val clock: Clock,
@@ -19,7 +19,7 @@ class TokenCleanupScheduler(
     private val log = LoggerFactory.getLogger(TokenCleanupScheduler::class.java)
   }
 
-  @Scheduled(cron = $$"${redfox.token-cleanup.cron:0 0/30 * * * *}")
+  @Scheduled(cron = $$"${authserver.token-cleanup.cron:0 0/30 * * * *}")
   @Transactional
   fun cleanupExpiredTokens() {
     val now = clock.instant()

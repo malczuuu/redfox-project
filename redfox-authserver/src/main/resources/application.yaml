@@ -77,7 +77,7 @@ logging:
 problem4j:
   detail-format: lowercase
 
-redfox:
+authserver:
   token-cleanup:
     enabled: true
     cron: "0 0/30 * * * *"

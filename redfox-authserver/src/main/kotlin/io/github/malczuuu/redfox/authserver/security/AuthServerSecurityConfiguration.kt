@@ -1,10 +1,18 @@
 package io.github.malczuuu.redfox.authserver.security
 
+import com.nimbusds.jose.jwk.JWKSet
+import com.nimbusds.jose.jwk.RSAKey
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
+import java.security.KeyStore
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.JdbcOperations
 import org.springframework.security.config.Customizer.withDefaults
@@ -22,11 +30,7 @@ import org.springframework.security.oauth2.server.authorization.JdbcOAuth2Author
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
-import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator
-import org.springframework.security.oauth2.server.authorization.token.JwtGenerator
-import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator
-import org.springframework.security.oauth2.server.authorization.token.OAuth2RefreshTokenGenerator
-import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator
+import org.springframework.security.oauth2.server.authorization.token.*
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
@@ -36,6 +40,7 @@ import tools.jackson.databind.json.JsonMapper
 @Configuration
 @EnableWebSecurity
 @EnableJdbcHttpSession
+@EnableConfigurationProperties(AuthServerSecurityProperties::class)
 class AuthServerSecurityConfiguration {
 
   @Bean
@@ -109,6 +114,20 @@ class AuthServerSecurityConfiguration {
       registeredClientRepository: RegisteredClientRepository,
   ): OAuth2AuthorizationConsentService =
       JdbcOAuth2AuthorizationConsentService(jdbcOperations, registeredClientRepository)
+
+  @Bean
+  fun jwkSource(properties: AuthServerSecurityProperties): JWKSource<SecurityContext> {
+    val resource = DefaultResourceLoader().getResource(properties.keyStore.location)
+    val password = properties.keyStore.password.toCharArray()
+    val keyStore = KeyStore.getInstance("PKCS12")
+    resource.inputStream.use { keyStore.load(it, password) }
+    val rsaKey =
+        RSAKey.Builder(keyStore.getCertificate(properties.keyStore.alias).publicKey as RSAPublicKey)
+            .privateKey(keyStore.getKey(properties.keyStore.alias, password) as RSAPrivateKey)
+            .keyID(properties.keyStore.alias)
+            .build()
+    return ImmutableJWKSet(JWKSet(rsaKey))
+  }
 
   @Bean
   fun tokenGenerator(jwkSource: JWKSource<SecurityContext>): OAuth2TokenGenerator<*> {
