@@ -4,6 +4,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.Instant
 import java.util.UUID
 
 // spotless:off
@@ -20,5 +21,8 @@ class UserEntity(
 
     @field:Column(name = "user_passhash", nullable = false, length = 255)
     var passhash: String,
+
+    @field:Column(name = "user_deleted_at")
+    var deletedAt: Instant? = null
 )
 // spotless:on
