@@ -77,14 +77,11 @@ class AuthServerSecurityConfiguration {
         authorize("/actuator/**", permitAll)
         authorize(anyRequest, authenticated)
       }
-      formLogin {
-        // authenticationSuccessHandler = RememberMeSuccessHandler()
-      }
+      formLogin {}
       logout {
-        logoutSuccessUrl = "/login?logout"
+        logoutSuccessUrl = "/"
         permitAll()
       }
-      rememberMe {}
     }
     return http.build()
   }
