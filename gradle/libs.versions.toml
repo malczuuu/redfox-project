@@ -34,12 +34,11 @@ junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 problem4j-spring-bom = { module = "io.github.problem4j:problem4j-spring-bom", version.ref = "problem4j-spring" }
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
+springdoc-openapi-bom = { module = "org.springdoc:springdoc-openapi-bom", version.ref = "springdoc-openapi" }
 tools-jackson-bom = { module = "tools.jackson:jackson-bom", version.ref = "tools-jackson" }
-wiremock-spring-boot = { module = "org.wiremock.integrations:wiremock-spring-boot", version.ref = "wiremock-spring-boot" }
 #
 #  modules managed by boms
 #
-
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
@@ -66,15 +65,17 @@ spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-st
 spring-boot-starter-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
 spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
 spring-session-jdbc = { module = "org.springframework.session:spring-session-jdbc" }
+springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
-tools-jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "tools-jackson" }
-
+tools-jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
+#
+#  other modules
+#
 archunit = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 checkmate-annotation = { module = "io.github.malczuuu:checkmate-annotation", version.ref = "checkmate" }
 checkmate-archunit = { module = "io.github.malczuuu:checkmate-archunit", version.ref = "checkmate" }
 checkmate-container = { module = "io.github.malczuuu:checkmate-container", version.ref = "checkmate" }
-jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
-springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc-openapi" }
+wiremock-spring-boot = { module = "org.wiremock.integrations:wiremock-spring-boot", version.ref = "wiremock-spring-boot" }
