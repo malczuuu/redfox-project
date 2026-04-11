@@ -1,6 +1,7 @@
 # RedFox Project
 
 [![Gradle Build](https://github.com/malczuuu/redfox-project/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/malczuuu/redfox-project/actions/workflows/gradle-build.yml)
+[![NPM Build](https://github.com/malczuuu/redfox-project/actions/workflows/npm-build.yml/badge.svg)](https://github.com/malczuuu/redfox-project/actions/workflows/npm-build.yml)
 
 > **Proof of Concept** - demonstrates OAuth2 PKCE authentication across a three-tier Spring Boot + Angular architecture.
 
