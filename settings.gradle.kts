@@ -19,6 +19,8 @@ include(":redfox-libs:redfox-log4j2")
 include(":redfox-libs:redfox-migration")
 include(":redfox-libs:redfox-testkit")
 
+verifyProjectNameDuplicates(rootProject)
+
 /**
  * Duplicate project names have some side effects. This function verifies that there are no duplicate project names in
  * the build. Throws an exception if duplicates are found.
