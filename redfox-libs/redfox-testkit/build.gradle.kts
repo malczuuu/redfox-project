@@ -23,7 +23,7 @@ dependencies {
     api(libs.tools.jackson.module.kotlin)
     api(libs.kotlin.reflect)
     api(libs.kotlin.test.junit5)
-    api(libs.wiremock.spring.boot)
+    api(libs.wiremock.spring.boot.standalone)
 
     testRuntimeOnly(libs.junit.platform.launcher)
 }

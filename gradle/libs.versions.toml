@@ -75,4 +75,4 @@ archunit = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "arc
 checkmate = { module = "io.github.malczuuu:checkmate", version.ref = "checkmate" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
-wiremock-spring-boot = { module = "org.wiremock.integrations:wiremock-spring-boot", version.ref = "wiremock-spring-boot" }
+wiremock-spring-boot-standalone = { module = "org.wiremock.integrations:wiremock-spring-boot-standalone", version.ref = "wiremock-spring-boot" }
