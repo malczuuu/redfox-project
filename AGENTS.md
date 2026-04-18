@@ -14,6 +14,7 @@ Requires JDK 25 and Docker (for Testcontainers). Always run `./gradlew spotlessA
 - No wildcard imports in Kotlin.
 - All dependency versions in `gradle/libs.versions.toml`.
 - Spotless enforces formatting - never manually reformat.
+- In `@Entity` classes, `//` comments keep Spotless/ktfmt from changing annotation formatting.
 - Private methods must be after public methods and ordered by importance and/or usage order.
 
 ## Test Guidelines

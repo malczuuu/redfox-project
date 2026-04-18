@@ -7,22 +7,20 @@ import jakarta.persistence.Table
 import java.time.Instant
 import java.util.UUID
 
-// spotless:off
 @Entity
 @Table(name = "users")
 class UserEntity(
-
+    //
     @field:Id
-    @field:Column(name = "user_id")
+    @field:Column(name = "user_id") //
     var id: UUID,
-
-    @field:Column(name = "user_login", nullable = false, length = 255, unique = true)
+    //
+    @field:Column(name = "user_login", nullable = false, length = 255, unique = true) //
     var login: String,
-
-    @field:Column(name = "user_passhash", nullable = false, length = 255)
+    //
+    @field:Column(name = "user_passhash", nullable = false, length = 255) //
     var passhash: String,
-
-    @field:Column(name = "user_deleted_at")
-    var deletedAt: Instant? = null
+    //
+    @field:Column(name = "user_deleted_at") //
+    var deletedAt: Instant? = null,
 )
-// spotless:on

@@ -9,21 +9,18 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
-// spotless:off
 @Entity
 @Table(name = "project_users")
 @AttributeOverrides(
     AttributeOverride(name = "id", column = Column(name = "project_user_id")),
 )
 class ProjectUserEntity(
-
+    //
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", updatable = false)
+    @JoinColumn(name = "project_id", updatable = false) //
     var project: ProjectEntity,
-
+    //
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", updatable = false)
-    var user: UserEntity
-
+    @JoinColumn(name = "user_id", updatable = false) //
+    var user: UserEntity,
 ) : AbstractEntity()
-// spotless:on

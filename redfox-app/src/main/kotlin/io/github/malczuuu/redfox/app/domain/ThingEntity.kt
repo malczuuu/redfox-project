@@ -10,7 +10,6 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.time.Instant
 
-// spotless:off
 @Entity
 @Table(name = "things")
 @AttributeOverrides(
@@ -20,22 +19,20 @@ import java.time.Instant
     AttributeOverride(name = "updatedAt", column = Column(name = "thing_updated_at")),
 )
 class ThingEntity(
-
+    //
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = false) //
     var project: ProjectEntity,
-
-    @field:Column(name = "thing_code", nullable = false, length = 255, unique = true)
+    //
+    @field:Column(name = "thing_code", nullable = false, length = 255, unique = true) //
     var code: String,
-
-    @field:Column(name = "thing_name", nullable = false, length = 255)
+    //
+    @field:Column(name = "thing_name", nullable = false, length = 255) //
     var name: String,
-
-    @field:Column(name = "thing_description", nullable = false, length = 2048)
+    //
+    @field:Column(name = "thing_description", nullable = false, length = 2048) //
     var description: String,
-
-    @field:Column(name = "thing_deleted_at")
-    var deletedAt: Instant? = null
-
+    //
+    @field:Column(name = "thing_deleted_at") //
+    var deletedAt: Instant? = null,
 ) : AuditableEntity()
-// spotless:on

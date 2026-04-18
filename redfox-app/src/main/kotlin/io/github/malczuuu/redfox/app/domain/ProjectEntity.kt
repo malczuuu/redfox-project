@@ -7,7 +7,6 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import java.time.Instant
 
-// spotless:off
 @Entity
 @Table(name = "projects")
 @AttributeOverrides(
@@ -17,18 +16,16 @@ import java.time.Instant
     AttributeOverride(name = "updatedAt", column = Column(name = "project_updated_at")),
 )
 class ProjectEntity(
-
-    @field:Column(name = "project_code", nullable = false, length = 255, unique = true)
+    //
+    @field:Column(name = "project_code", nullable = false, length = 255, unique = true) //
     var code: String,
-
-    @field:Column(name = "project_name", nullable = false, length = 255)
+    //
+    @field:Column(name = "project_name", nullable = false, length = 255) //
     var name: String,
-
-    @field:Column(name = "project_description", nullable = false, length = 2048)
+    //
+    @field:Column(name = "project_description", nullable = false, length = 2048) //
     var description: String,
-
-    @field:Column(name = "project_deleted_at")
-    var deletedAt: Instant? = null
-
+    //
+    @field:Column(name = "project_deleted_at") //
+    var deletedAt: Instant? = null,
 ) : AuditableEntity()
-// spotless:on

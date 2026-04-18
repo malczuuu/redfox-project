@@ -5,13 +5,10 @@ import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
 import java.util.UUID
 
-// spotless:off
 @MappedSuperclass
 abstract class AbstractEntity(
-
+    //
     @Id
-    @field:Column(name = "id", nullable = false)
+    @field:Column(name = "id", nullable = false) //
     val id: UUID = UUID.randomUUID()
-
 )
-// spotless:on
