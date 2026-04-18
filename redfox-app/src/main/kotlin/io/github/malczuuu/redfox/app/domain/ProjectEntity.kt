@@ -7,6 +7,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import java.time.Instant
 
+/** `//` comments keep Spotless/ktfmt from changing annotation formatting. */
 @Entity
 @Table(name = "projects")
 @AttributeOverrides(

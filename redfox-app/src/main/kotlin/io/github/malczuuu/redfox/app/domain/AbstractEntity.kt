@@ -5,6 +5,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
 import java.util.UUID
 
+/** `//` comments keep Spotless/ktfmt from changing annotation formatting. */
 @MappedSuperclass
 abstract class AbstractEntity(
     //

@@ -7,6 +7,7 @@ import jakarta.persistence.Table
 import java.time.Instant
 import java.util.UUID
 
+/** `//` comments keep Spotless/ktfmt from changing annotation formatting. */
 @Entity
 @Table(name = "users")
 class UserEntity(

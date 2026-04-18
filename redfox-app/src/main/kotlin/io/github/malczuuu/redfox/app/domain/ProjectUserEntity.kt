@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
+/** `//` comments keep Spotless/ktfmt from changing annotation formatting. */
 @Entity
 @Table(name = "project_users")
 @AttributeOverrides(

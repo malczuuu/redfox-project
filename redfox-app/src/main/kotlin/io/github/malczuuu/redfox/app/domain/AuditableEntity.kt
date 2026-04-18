@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
+/** `//` comments keep Spotless/ktfmt from changing annotation formatting. */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
 abstract class AuditableEntity(
