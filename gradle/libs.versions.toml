@@ -4,7 +4,7 @@
 [versions]
 archunit = "1.4.1"
 checkmate = "0.0.8"
-fasterxml-jackson = "2.21.2"
+fasterxml-jackson = "2.21.3"
 idea-ext = "1.4.1"
 junit = "6.0.3"
 kotlin = "2.3.20"
