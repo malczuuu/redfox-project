@@ -2,7 +2,7 @@
 #  Entries in each section (or subsection) are ordered alphabetically by module name.
 #
 [versions]
-archunit = "1.4.1"
+archunit = "1.4.2"
 checkmate = "0.0.8"
 fasterxml-jackson = "2.21.2"
 idea-ext = "1.4.1"
